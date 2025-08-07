@@ -4,9 +4,10 @@ import Admin from '../models/admin.model.js'; // Import the Admin model
 import bcrypt from 'bcryptjs';
 import { generateToken } from '../lib/utils.js'; // Re-use the same token generation utility
 import Product from '../models/product.model.js'; // Ensure correct path
-// import Collection from '../models/collection.model.js'; // To validate collectionId
+import User from '../models/user.model.js';
 import mongoose from 'mongoose';
 import cloudinary from '../lib/cloudinary.js';
+import Recipe from '../models/recipe.model.js';
 
 export const adminSignup = async (req, res) => {
   const { username, email, password } = req.body;
@@ -430,3 +431,245 @@ export const delProduct = async (req, res) => {
     res.status(500).json({ message: 'Internal Server Error' });
   }
 };
+
+export const getAllUsers = async (req, res) => {
+  try {
+    const users = await User.find({}).select('-password');
+    return res.status(200).json({
+      success: true,
+      count: users.length,
+      users,
+    });
+  } catch (error) {
+    // 4. Handle any database or server-side errors.
+    console.error('Error fetching all users:', error);
+    return res.status(500).json({
+      success: false,
+      message: 'Server Error. Could not retrieve users.',
+    });
+  }
+};
+
+export const addRecipe = async (req, res) => {
+  const { name, description, ingredients, image, rodd } = req.body;
+
+  console.log(rodd)
+  // Basic validation
+  if (
+    !name ||
+    !description ||
+    !ingredients ||
+    ingredients.length === 0 ||
+    !image || !rodd
+  ) {
+    return res.status(400).json({
+      message:
+        'Please provide all required recipe fields: name, description, image, and ingredients.',
+    });
+  }
+
+  try {
+    // Upload the single image to Cloudinary
+    let uploadedImage = {};
+    if (image && typeof image === 'string' && image.startsWith('data:image')) {
+      const uploadResponse = await cloudinary.uploader.upload(image, {
+        folder: 'recipe_images',
+      });
+      uploadedImage = {
+        url: uploadResponse.secure_url,
+        public_id: uploadResponse.public_id,
+      };
+    } else {
+      return res.status(400).json({ message: 'Invalid image data provided.' });
+    }
+
+    // Create and save the new recipe
+    const newRecipe = new Recipe({
+      name,
+      description,
+      ingredients,
+      image: uploadedImage,
+      isRecipeOfTheDay: rodd
+    });
+
+    const savedRecipe = await newRecipe.save();
+
+    // Populate ingredients to return a more complete object
+    const populatedRecipe = await Recipe.findById(savedRecipe._id).populate(
+      'ingredients',
+      'name'
+    ); // Only populate the product name for a lighter response
+
+    res.status(201).json(populatedRecipe);
+  } catch (error) {
+    console.error('Error in addRecipe controller:', error.message);
+    if (error.name === 'ValidationError') {
+      const errors = Object.values(error.errors).map((err) => err.message);
+      return res
+        .status(400)
+        .json({ message: 'Recipe validation failed', errors });
+    }
+    res.status(500).json({ message: 'Internal Server Error' });
+  }
+};
+
+/**
+ * @desc    Edit an existing recipe
+ * @route   POST /operations/recipe/edit
+ * @access  Private (Admin)
+ */
+export const editRecipe = async (req, res) => {
+  const { _id, name, description, ingredients, image, rodd } = req.body;
+
+  console.log(rodd)
+  if (!_id || !mongoose.Types.ObjectId.isValid(_id)) {
+    return res
+      .status(400)
+      .json({ message: 'A valid recipe ID is required for editing.' });
+  }
+
+  try {
+    const existingRecipe = await Recipe.findById(_id);
+    if (!existingRecipe) {
+      return res.status(404).json({ message: 'Recipe not found.' });
+    }
+
+    let updatedImage = existingRecipe.image;
+    // If a new image is provided, delete the old one and upload the new one
+    if (image && typeof image === 'string' && image.startsWith('data:image')) {
+      if (existingRecipe.image?.public_id) {
+        await cloudinary.uploader.destroy(existingRecipe.image.public_id);
+      }
+      const uploadResponse = await cloudinary.uploader.upload(image, {
+        folder: 'recipe_images',
+      });
+      updatedImage = {
+        url: uploadResponse.secure_url,
+        public_id: uploadResponse.public_id,
+      };
+    }
+
+    const updatedRecipe = await Recipe.findByIdAndUpdate(
+      _id,
+      {
+        name,
+        isRecipeOfTheDay: rodd,
+        description,
+        ingredients,
+        image: updatedImage,
+      },
+      { new: true, runValidators: true }
+    ).populate('ingredients', 'name');
+
+    if (!updatedRecipe) {
+      return res.status(404).json({ message: 'Recipe not found.' });
+    }
+
+    res.status(200).json(updatedRecipe);
+  } catch (error) {
+    console.error('Error in editRecipe controller:', error.message);
+    if (error.name === 'ValidationError') {
+      const errors = Object.values(error.errors).map((err) => err.message);
+      return res
+        .status(400)
+        .json({ message: 'Recipe validation failed', errors });
+    }
+    res.status(500).json({ message: 'Internal Server Error' });
+  }
+};
+
+/**
+ * @desc    Delete a recipe
+ * @route   DELETE /operations/recipe/remove
+ * @access  Private (Admin)
+ */
+export const delRecipe = async (req, res) => {
+  const { _id } = req.body;
+
+  if (!_id || !mongoose.Types.ObjectId.isValid(_id)) {
+    return res
+      .status(400)
+      .json({ message: 'A valid recipe ID is required for deletion.' });
+  }
+
+  try {
+    const recipe = await Recipe.findById(_id);
+    if (!recipe) {
+      return res.status(404).json({ message: 'Recipe not found.' });
+    }
+
+    // Delete the image from Cloudinary
+    if (recipe.image && recipe.image.public_id) {
+      await cloudinary.uploader.destroy(recipe.image.public_id);
+    }
+
+    await Recipe.findByIdAndDelete(_id);
+    res
+      .status(200)
+      .json({ message: 'Recipe and its image deleted successfully.' });
+  } catch (error) {
+    console.error('Error in delRecipe controller:', error.message);
+    res.status(500).json({ message: 'Internal Server Error' });
+  }
+};
+
+/**
+ * @desc    Get all recipes
+ * @route   GET /operations/recipe/get
+ * @access  Private (Admin)
+ */
+export const getRecipes = async (req, res) => {
+  try {
+    const recipes = await Recipe.find({}).populate('ingredients', 'name');
+    res.status(200).json(recipes);
+  } catch (error) {
+    console.error('Error in getRecipes controller:', error.message);
+    res.status(500).json({ message: 'Internal Server Error' });
+  }
+};
+
+/**
+ * @desc    Get a single recipe by ID
+ * @route   GET /operations/recipe/get/:Id
+ * @access  Private (Admin)
+ */
+export const getRecipeById = async (req, res) => {
+  const { recipeId } = req.params;
+
+  if (!mongoose.Types.ObjectId.isValid(recipeId)) {
+    return res.status(400).json({ message: 'Invalid recipe ID format.' });
+  }
+
+  try {
+    const recipe = await Recipe.findById(recipeId).populate('ingredients', 'name');
+    if (!recipe) {
+      return res.status(404).json({ message: 'Recipe not found.' });
+    }
+    res.status(200).json(recipe);
+  } catch (error) {
+    console.error('Error in getRecipeById controller:', error.message);
+    res.status(500).json({ message: 'Internal Server Error' });
+  }
+};
+
+export const toggleRodd = async (req, res) => {
+    try {
+    const { recipeId } = req.params;
+    const { isRecipeOfTheDay } = req.body;
+
+    // Find the recipe and update its status
+    const recipe = await Recipe.findById(recipeId);
+    if (!recipe) {
+      return res.status(404).json({ message: 'Recipe not found.' });
+    }
+
+    recipe.isRecipeOfTheDay = isRecipeOfTheDay;
+    await recipe.save(); // The pre-save hook will run here
+
+    // Send the updated recipe back to the client
+    res.status(200).json({ message: 'Recipe updated successfully.', recipe });
+  } catch (error) {
+    console.error('Error toggling Recipe of the Day:', error);
+    res.status(500).json({ message: 'Server error.', error: error.message });
+  }
+}

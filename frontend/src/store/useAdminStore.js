@@ -4,14 +4,25 @@ import toast from 'react-hot-toast';
 import { useAuthStore } from './useAuthStore.js';
 import { useProductsStore } from './useProductsStore.js';
 
-export const useAdminStore = create((set) => ({
+export const useAdminStore = create((set, get) => ({
   authUser: null,
   isLoading: false,
   isSidebarOpen: false, // Initial state: sidebar is closed
   isAddingProduct: false,
   isUpdatingProduct: false,
   isDeletingProduct: false,
-  
+  users: [],
+  usersCount: null,
+  isGettingUsers: false,
+  recipes: [],
+  recipe: null,
+  isGettingRecipes: false,
+  isAddingRecipe: false,
+  isUpdatingRecipe: false,
+  isDeletingRecipe: false,
+  recipeError: null,
+  isTogglingRecipeOfTheDay: false,
+
   // Action to toggle sidebar visibility
   toggleSidebar: () =>
     set((state) => ({ isSidebarOpen: !state.isSidebarOpen })),
@@ -105,5 +116,187 @@ export const useAdminStore = create((set) => ({
     } finally {
       set({ isDeletingProduct: false });
     }
+  },
+
+  getAllUsers: async () => {
+    // 1. Set loading state to true
+    set({ isGettingUsers: true });
+
+    // 2. Security check: Only proceed if the user is an admin
+    const { isAdmin } = useAuthStore.getState();
+    if (!isAdmin) {
+      toast.error('You do not have permission to view users.');
+      set({ isGettingUsers: false });
+      return;
+    }
+
+    try {
+      // 3. Make the API call to the backend endpoint
+      const res = await axiosInstance.get('/admin/operations/getUsers');
+
+      // 4. Update the store state with the fetched users
+      set({ users: res.data.users });
+      set({ usersCount: res.data.count });
+    } catch (error) {
+      console.error('Error fetching users:', error);
+      const errorMessage =
+        error.response?.data?.message || 'Failed to fetch users.';
+      set({ usersError: errorMessage });
+      toast.error(errorMessage);
+    } finally {
+      // 6. Reset the loading state
+      set({ isGettingUsers: false });
+    }
+  },
+
+  getRecipes: async () => {
+    set({ isGettingRecipes: true, recipeError: null });
+    try {
+      const res = await axiosInstance.get('/admin/operations/recipe/get');
+      set({ recipes: res.data });
+    } catch (error) {
+      console.error('Error fetching recipes:', error);
+      const errorMessage =
+        error.response?.data?.message || 'Failed to fetch recipes.';
+      set({ recipeError: errorMessage });
+      toast.error(errorMessage);
+    } finally {
+      set({ isGettingRecipes: false });
+    }
+  },
+
+  /**
+   * Fetches a single recipe by its ID.
+   * @param {string} id - The ID of the recipe to fetch.
+   * @returns {object|null} The fetched recipe object or null if not found.
+   */
+  getRecipeById: async (id) => {
+    set({ isGettingSingleRecipe: true, recipeError: null });
+    try {
+      const res = await axiosInstance.get(`/admin/operations/recipe/get/${id}`);
+      // Return the single recipe data directly
+      set({ recipe: res.data });
+    } catch (error) {
+      console.error(`Error fetching recipe with ID ${id}:`, error);
+      const errorMessage =
+        error.response?.data?.message || 'Failed to fetch recipe.';
+      set({ recipeError: errorMessage });
+      toast.error(errorMessage);
+      return null;
+    } finally {
+      set({ isGettingSingleRecipe: false });
+    }
+  },
+
+  /**
+   * Adds a new recipe.
+   * @param {object} recipeData - The recipe data (name, description, ingredients, image).
+   */
+  addRecipe: async (recipeData) => {
+    set({ isAddingRecipe: true, recipeError: null });
+    try {
+      const res = await axiosInstance.post(
+        '/admin/operations/recipe/new',
+        recipeData
+      );
+      set((state) => ({ recipes: [...state.recipes, res.data] }));
+      toast.success('Recipe added successfully!');
+    } catch (error) {
+      console.error('Error adding recipe:', error);
+      const errorMessage =
+        error.response?.data?.message || 'Failed to add recipe.';
+      set({ recipeError: errorMessage });
+      toast.error(errorMessage);
+    } finally {
+      set({ isAddingRecipe: false });
+    }
+  },
+
+  /**
+   * Edits an existing recipe.
+   * @param {object} recipeData - The updated recipe data including the _id.
+   */
+  editRecipe: async (recipeData) => {
+    set({ isUpdatingRecipe: true, recipeError: null });
+    try {
+      const res = await axiosInstance.post(
+        '/admin/operations/recipe/edit',
+        recipeData
+      );
+      set((state) => ({
+        recipes: state.recipes.map((recipe) =>
+          recipe._id === res.data._id ? res.data : recipe
+        ),
+      }));
+      toast.success('Recipe updated successfully!');
+    } catch (error) {
+      console.error('Error editing recipe:', error);
+      const errorMessage =
+        error.response?.data?.message || 'Failed to edit recipe.';
+      set({ recipeError: errorMessage });
+      toast.error(errorMessage);
+    } finally {
+      set({ isUpdatingRecipe: false });
+    }
+  },
+
+  /**
+   * Deletes a recipe by its ID.
+   * @param {string} _id - The ID of the recipe to delete.
+   */
+  deleteRecipe: async (_id) => {
+    set({ isDeletingRecipe: true, recipeError: null });
+    try {
+      await axiosInstance.delete('/admin/operations/recipe/remove', {
+        data: { _id },
+      });
+      set((state) => ({
+        recipes: state.recipes.filter((recipe) => recipe._id !== _id),
+      }));
+      toast.success('Recipe deleted successfully!');
+    } catch (error) {
+      console.error('Error deleting recipe:', error);
+      const errorMessage =
+        error.response?.data?.message || 'Failed to delete recipe.';
+      set({ recipeError: errorMessage });
+      toast.error(errorMessage);
+    } finally {
+      set({ isDeletingRecipe: false });
+    }
+  },
+
+  toggleRecipeOfTheDay: async (recipeId, status) => {
+    set({ isTogglingRecipeOfTheDay: true, adminError: null });
+    try {
+      // API call to update the recipe
+      const response = await axiosInstance.put(`/admin/operations/recipe/rodd/${recipeId}`, {
+        isRecipeOfTheDay: status,
+      });
+
+      const updatedRecipe = response.data.recipe;
+
+      // Update the recipes in the store
+      const allRecipes = get().recipes;
+      const updatedRecipes = allRecipes.map((r) => {
+        // If the current recipe is the one we updated, replace it with the new data
+        if (r._id === updatedRecipe._id) {
+          return updatedRecipe;
+        }
+        // If another recipe was previously the ROD, set its status to false
+        if (r.isRecipeOfTheDay && r._id !== updatedRecipe._id) {
+          return { ...r, isRecipeOfTheDay: false };
+        }
+        return r;
+      });
+
+      set({ recipes: updatedRecipes, isTogglingRecipeOfTheDay: false });
+    } catch (error) {
+      set({
+        adminError: error.response?.data?.message || 'Failed to toggle Recipe of the Day.',
+        isTogglingRecipeOfTheDay: false,
+      });
+      return false;
+    }
+    return true;
   },
 }));

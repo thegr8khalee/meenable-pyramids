@@ -246,6 +246,7 @@ const AdminAddProductPage = () => {
               <option value="spice">Spice</option>
               <option value="herb">Herb</option>
               <option value="blend">Blend</option>
+              <option value="chilli powder">Chilli Powder</option>
             </select>
           </div>
 

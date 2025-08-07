@@ -1,23 +1,24 @@
 // src/components/Admin/AdminSidebar.jsx
 import React from 'react';
-import { useAuthStore } from '../../store/useAuthStore'; // For logout functionality
+import { useAuthStore } from '../../store/useAuthStore';
 import { X } from 'lucide-react';
 
-const AdminSidebar = ({ activeSection, setActiveSection, isSidebarOpen, setIsSidebarOpen }) => {
+const AdminSidebar = ({ activeSection, setActiveSection, isSidebarOpen, closeSidebar }) => {
     const logout = useAuthStore((state) => state.logout);
 
     const navItems = [
         { id: 'dashboard', name: 'Dashboard Overview' },
         { id: 'products', name: 'Manage Products' },
-        // { id: 'collections', name: 'Manage Collections' },
+        { id: 'recipe', name: 'Manage Recipes' },
+        { id: 'users', name: 'Users' },
     ];
 
     // Function to handle navigation item click and close sidebar on mobile
     const handleNavigationClick = (sectionId) => {
         setActiveSection(sectionId);
-        // Always call setIsSidebarOpen (which is closeSidebar from the store)
-        // This ensures the sidebar closes regardless of screen size if a nav item is clicked.
-        setIsSidebarOpen(false); // Call the passed setter to close the sidebar
+        // Corrected: Call the prop directly to close the sidebar.
+        // It's a function from the store that doesn't take arguments.
+        closeSidebar();
     };
 
     return (
@@ -34,7 +35,7 @@ const AdminSidebar = ({ activeSection, setActiveSection, isSidebarOpen, setIsSid
             <div className="lg:hidden absolute top-4 right-4">
                 <button
                     className="btn btn-ghost btn-circle"
-                    onClick={() => setIsSidebarOpen(false)} // Call the passed setter to close
+                    onClick={closeSidebar} // Corrected: Call the prop directly
                     aria-label="Close sidebar"
                 >
                     <X size={24} />

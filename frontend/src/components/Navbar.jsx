@@ -7,12 +7,13 @@ import {
   UserIcon, // For profile link
   X, // NEW: Import X icon for close button
 } from 'lucide-react';
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 // import LogoLightMode from '../images/logoLightMode.png';
 
 import { useAuthStore } from '../store/useAuthStore';
 import { useAdminStore } from '../store/useAdminStore';
+import { useCartStore } from '../store/UseCartStore';
 // import { useCartStore } from '../store/useCartStore';
 // import { useWishlistStore } from '../store/useWishlistStore';
 // import { useProductsStore } from '../store/useProductsStore'; // No longer needed if categories are hardcoded here
@@ -23,23 +24,23 @@ const Navbar = () => {
   const isDashboard = location.pathname === '/admin/dashboard';
   const { authUser, isAdmin, isAuthReady } = useAuthStore();
   const { toggleSidebar, closeSidebar: closeAdminSidebar } = useAdminStore();
-  // const { getCart, cart } = useCartStore();
+  const { getCart, cart } = useCartStore();
   // const { getwishlist, wishlist } = useWishlistStore();
 
-  // useEffect(() => {
-  //   if (isAuthReady && !isAdmin) {
-  //     getCart();
-  //     getwishlist();
-  //   }
-  // }, [getCart, getwishlist, isAuthReady, isAdmin]);
+  useEffect(() => {
+    if (isAuthReady && !isAdmin) {
+      getCart();
+    }
+  }, [getCart, isAuthReady, isAdmin]);
 
   // console.log(wishlist)
 
   // Hardcoded categories (moved from useProductsStore import)
   const uniqueCategories = [
-    { id: '1', name: 'Spice', link: 'Living%20Room' },
-    { id: '2', name: 'Herbs', link: 'Armchair' },
-    { id: '3', name: 'Seasoning', link: 'Living%20Room' },
+    { id: '1', name: 'Spice', link: 'spice' },
+    { id: '2', name: 'Herbs', link: 'herbs' },
+    { id: '3', name: 'Seasoning', link: 'seasoning' },
+    {id: '4', name: 'Chilli Powder', link: 'chilli powder'}
   ];
 
   const [isDrawerChecked, setIsDrawerChecked] = useState(false);
@@ -58,20 +59,12 @@ const Navbar = () => {
 
   const handleCategoryLinkClick = (categoryLink) => {
     // Changed parameter name to avoid confusion
-    navigate(`/shop?category=${categoryLink}`);
+    navigate(`/shop?view=${categoryLink}`);
     setTimeout(() => {
       window.scrollTo(0, 0);
     }, 10);
     closeDrawer();
   };
-
-  // const handleStyleLinkClick = (styleName) => {
-  //   navigate(`/styles/${encodeURIComponent(styleName)}`);
-  //   setTimeout(() => {
-  //     window.scrollTo(0, 0);
-  //   }, 10);
-  //   closeDrawer();
-  // };
 
   const handleMobileSearchClick = () => {
     navigate('/shop', { state: { focusSearch: true } });
@@ -90,13 +83,6 @@ const Navbar = () => {
 
   const handleCartClick = () => {
     navigate('/cart');
-    setTimeout(() => {
-      window.scrollTo(0, 0);
-    }, 10);
-  };
-
-  const handleHeartClick = () => {
-    navigate('/wishlist');
     setTimeout(() => {
       window.scrollTo(0, 0);
     }, 10);
@@ -194,6 +180,15 @@ const Navbar = () => {
                   Contact Us
                 </Link>
               </li>
+              <li>
+                <Link
+                  to="/recipes"
+                  className="btn btn-lg font-normal border-0 justify-start"
+                  onClick={closeDrawer}
+                >
+                 Recipes
+                </Link>
+              </li>
             </div>
 
             <>
@@ -236,9 +231,9 @@ const Navbar = () => {
           <Link to="/shop" className=" border-0 shadow-none btn-ghost">
             Shop
           </Link>
-          {/* <Link to="/e-catalog" className=" border-0 shadow-none btn-ghost">
-            E-Catalog
-          </Link> */}
+          <Link to="/recipes" className=" border-0 shadow-none btn-ghost">
+           Recipes
+          </Link>
           {/* <Link to="/showroom" className=" border-0 shadow-none btn-ghost">
             Showroom
           </Link> */}
@@ -283,23 +278,12 @@ const Navbar = () => {
                 className="relative btn btn-ghost"
                 onClick={() => handleCartClick()}
               >
-                {/* {cart?.length !== 0 && cart !== null ? (
+                {cart?.length !== 0 && cart !== null ? (
                   <div className="absolute right-1 top-0 bg-red-500 text-xs w-4 h-4 rounded-full flex justify-center items-center">
                     {cart?.length}
                   </div>
-                ) : null} */}
+                ) : null}
                 <ShoppingCart />
-              </button>
-              <button
-                className="relative btn btn-ghost"
-                onClick={() => handleHeartClick()}
-              >
-                {/* {wishlist?.length !== 0 && wishlist !== null ? (
-                  <div className="absolute top-0 right-1 bg-red-500 text-xs w-4 h-4 rounded-full flex justify-center items-center">
-                    {wishlist?.length}
-                  </div>
-                ) : null} */}
-                <HeartIcon />
               </button>
             </div>
           ) : null}

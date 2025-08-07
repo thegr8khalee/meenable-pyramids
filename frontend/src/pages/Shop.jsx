@@ -62,6 +62,8 @@ const Shop = () => {
       setViewMode('herbs');
     } else if (viewFromUrl === 'seasoning') {
       setViewMode('seasoning');
+    } else if (viewFromUrl === 'chilli powder') {
+      setViewMode('chilli powder');
     } else {
       setViewMode('spice');
     }
@@ -86,6 +88,8 @@ const Shop = () => {
       filters.category = 'herb'; // Map 'herbs' UI to 'herb' enum
     } else if (viewMode === 'seasoning') {
       filters.category = 'seasoning'; // Map 'seasoning' UI to 'blend' enum
+    } else if (viewMode == 'chilli powder') {
+      filters.category = 'chilli powder';
     }
 
     if (productSearchQuery.trim() !== '') {
@@ -223,6 +227,17 @@ const Shop = () => {
               onClick={() => setViewMode('seasoning')}
             >
               Seasoning
+            </button>
+            <button
+              type="button"
+              className={`btn tab rounded-none shadow-none border-none ${
+                viewMode === 'chilli powder'
+                  ? 'tab-active bg-primary text-white'
+                  : ''
+              }`}
+              onClick={() => setViewMode('chilli powder')}
+            >
+              Chiili Powder
             </button>
           </div>
         </div>

@@ -41,7 +41,7 @@ const CookieConsentBanner = () => {
   }
 
   return (
-    <div className="font-[poppins] sticky bottom-20 lg:bottom-2 left-0 right-0 bg-base-200  p-4 z-50 l rounded-none md:mx-4 md:mb-4 flex flex-col md:flex-row items-center justify-between space-y-3 md:space-y-0 md:space-x-4 animate-slide-up">
+    <div className="font-[inter] sticky bottom-20 lg:bottom-2 left-0 right-0 bg-base-200  p-4 z-50 l rounded-none md:mx-4 md:mb-4 flex flex-col md:flex-row items-center justify-between space-y-3 md:space-y-0 md:space-x-4 animate-slide-up">
       <div className="flex-1 text-sm text-center md:text-left">
         <p>
           We use cookies to ensure you get the best experience on our website.

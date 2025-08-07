@@ -23,7 +23,7 @@ const productSchema = new mongoose.Schema(
     price: { type: Number, required: true, min: 0 },
     category: {
       type: String,
-      enum: ['spice', 'herb', 'seasoning'],
+      enum: ['spice', 'herb', 'seasoning', 'chilli powder'],
       default: 'spice',
       required: true,
     },

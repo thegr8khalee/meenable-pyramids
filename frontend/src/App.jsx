@@ -20,6 +20,9 @@ import Shop from './pages/Shop';
 import ProductPage from './pages/ProductPage';
 import CartPage from './pages/Cart';
 import CookieConsentBanner from './components/CookieConsentBanner';
+import BottomNavbar from './components/BottomNavbar';
+import AdminAddRecipePage from './pages/AddRecipePage';
+import AdminEditRecipePage from './pages/EditRecipePage';
 
 function App() {
   const { checkAuth, authUser, isAdmin, isAuthReady } = useAuthStore();
@@ -28,11 +31,12 @@ function App() {
     checkAuth();
   }, [checkAuth]);
 
-  console.log(authUser)
+  console.log(authUser);
   return (
     <div>
       <main>
         <Navbar />
+        <BottomNavbar />
         <Routes>
           <Route path="/" element={<LandingPage />} />
           <Route path="/shop" element={<Shop />} />
@@ -64,12 +68,15 @@ function App() {
               path="/admin/products/edit/:productId"
               element={<AdminEditProductPage />}
             />
+            <Route path="/admin/recipe/new" element={<AdminAddRecipePage />} />
+            <Route path="/admin/recipe/edit/:recipeId" element={<AdminEditRecipePage />} />
           </Route>
         </Routes>
-        <Footer />
+
         <Toaster />
-        {!authUser && isAuthReady && <CookieConsentBanner />}
       </main>
+      <Footer />
+      {!authUser && isAuthReady && <CookieConsentBanner />}
     </div>
   );
 }
