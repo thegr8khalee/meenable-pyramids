@@ -18,6 +18,8 @@ import AdminEditProductPage from './pages/EditProductPage';
 import { Toaster } from 'react-hot-toast';
 import Shop from './pages/Shop';
 import ProductPage from './pages/ProductPage';
+import CartPage from './pages/Cart';
+import CookieConsentBanner from './components/CookieConsentBanner';
 
 function App() {
   const { checkAuth, authUser, isAdmin, isAuthReady } = useAuthStore();
@@ -26,6 +28,7 @@ function App() {
     checkAuth();
   }, [checkAuth]);
 
+  console.log(authUser)
   return (
     <div>
       <main>
@@ -34,6 +37,7 @@ function App() {
           <Route path="/" element={<LandingPage />} />
           <Route path="/shop" element={<Shop />} />
           <Route path="/product/:productId" element={<ProductPage />} />
+          <Route path="/cart" element={<CartPage />} />
           <Route
             path="/profile"
             element={authUser ? <ProfilePage /> : <LoginPage />}
@@ -64,6 +68,7 @@ function App() {
         </Routes>
         <Footer />
         <Toaster />
+        {!authUser && isAuthReady && <CookieConsentBanner />}
       </main>
     </div>
   );

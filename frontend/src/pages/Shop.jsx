@@ -5,17 +5,10 @@ import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { useLocation, useNavigate, Link } from 'react-router-dom';
 import { useProductsStore } from '../store/useProductsStore';
 import { useAuthStore } from '../store/useAuthStore';
-import {
-  Loader2,
-  Filter,
-  Search,
-  ChevronDown,
-  ChevronUp,
-  Heart,
-  ShoppingCart,
-} from 'lucide-react';
+import { Loader2, Filter, Search, ShoppingCart } from 'lucide-react';
 import FilterModal from '../components/FilterModal';
-import whatsapp from '../images/whatsapp.png'
+import whatsapp from '../images/whatsapp.png';
+import { useCartStore } from '../store/UseCartStore';
 const ITEMS_PER_PAGE = 12;
 
 const Shop = () => {
@@ -26,6 +19,14 @@ const Shop = () => {
   const { products, getProducts, isGettingProducts, hasMoreProducts } =
     useProductsStore();
   const { isAdmin, checkAuth, isAuthReady } = useAuthStore();
+  const {
+    addToCart,
+    // isAddingToCart,
+  } = useCartStore();
+
+  const handleAddToCart = (id, quantity, type) => {
+    addToCart(id, quantity, type);
+  };
 
   // View Mode State ('spice', 'herbs', or 'seasoning')
   const [viewMode, setViewMode] = useState('spice');
@@ -351,9 +352,7 @@ const Shop = () => {
                                   rel="noopener noreferrer"
                                 >
                                   <img
-                                    src={
-                                     whatsapp
-                                    }
+                                    src={whatsapp}
                                     alt="WhatsApp"
                                     className="size-5"
                                   />
@@ -361,6 +360,9 @@ const Shop = () => {
                                 <button
                                   type="button"
                                   className="btn text-white rounded-none bg-primary shadow-none border-none"
+                                  onClick={() =>
+                                    handleAddToCart(product._id, 1)
+                                  }
                                 >
                                   <ShoppingCart className="" />
                                 </button>

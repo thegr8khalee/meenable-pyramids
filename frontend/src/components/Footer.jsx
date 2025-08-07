@@ -2,8 +2,8 @@ import React from 'react';
 
 const Footer = () => {
   return (
-    <div className=' bg-base-300'>
-      <footer className="footer sm:footer-horizontal text-base-content p-10">
+    <div>
+      <footer className="bg-base-300 bottom-0 footer sm:footer-horizontal text-base-content p-10">
         <aside>
           <svg
             width="50"
@@ -38,14 +38,12 @@ const Footer = () => {
         </nav>
         <nav>
           <h6 className="footer-title">Legal</h6>
-          <a className="link link-hover">Terms of use</a>
+          <a className="link link-hover">Terms & conditions</a>
           <a className="link link-hover">Privacy policy</a>
           <a className="link link-hover">Cookie policy</a>
         </nav>
       </footer>
-      <div className='w-full text-center pb-10'>
-        <h1>Copyright © 2025 - All right reserved by Meenable Pyramids Ltd</h1>
-      </div>
+      
     </div>
   );
 };

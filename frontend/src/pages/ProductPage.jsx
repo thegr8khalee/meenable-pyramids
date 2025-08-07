@@ -12,7 +12,7 @@ import {
   Pen,
   Trash2,
 } from 'lucide-react';
-import whatsapp from '../images/whatsapp.png'
+import whatsapp from '../images/whatsapp.png';
 import { useProductsStore } from '../store/useProductsStore';
 // import whatsapp from '../images/whatsapp.png';
 // import { useCartStore } from '../store/useCartStore';
@@ -228,7 +228,7 @@ const ProductPage = () => {
                 <img
                   src={product.images[currentImageIndex].url}
                   alt={product.name}
-                  className="w-full h-full rounded-xl transition-opacity duration-300 ease-in-out"
+                  className="object-contain w-full h-full rounded-xl transition-opacity duration-300 ease-in-out"
                   onError={(e) => {
                     e.target.onerror = null;
                     e.target.src =
@@ -298,7 +298,7 @@ const ProductPage = () => {
         <div className="sm:w-1/2 space-y-1">
           <div className="flex flex-wrap space-x-2 font-normal text-gray-500 items-center text-xs sm:text-base">
             {/* <p>{product.style}</p> */}
-            <p className='capitalize'>{product.category}</p>
+            <p className="capitalize">{product.category}</p>
             {/* {product.isForeign && product.origin && (
               <span>| Made in {product.origin}</span>
             )} */}
@@ -307,8 +307,7 @@ const ProductPage = () => {
             )} */}
           </div>
           <h1 className="text-3xl font-bold font-[poppins]">{product.name}</h1>
-          <p>{product.ingredients}</p>
-          <div className="text-base font-[montserrat] text-gray-600"></div>
+          {/* <div className="text-base font-[montserrat] text-gray-600"></div> */}
           <div className="flex items-baseline space-x-3">
             {product.isPromo && product.discountedPrice !== undefined ? (
               <>
@@ -346,22 +345,15 @@ const ProductPage = () => {
               </span>
             )}
           </div>{' '}
-          {/* <p
-            className="text text-gray-700 font-[montserrat]"
-            dangerouslySetInnerHTML={{ __html: product.description }}
-          ></p> */}
+          <p>
+            <b>Ingredients:</b> {product.ingredients}
+          </p>
           {!isAdmin ? (
             <a
               className="my-4 btn bg-green-500 text-base-100 w-full rounded-none font-[inter] shadow-none border-0"
               href={whatsappHref(product)}
             >
-              <img
-                src={
-                  whatsapp
-                }
-                alt=""
-                className="size-6"
-              />
+              <img src={whatsapp} alt="" className="size-6" />
               Order Now
             </a>
           ) : null}
@@ -401,6 +393,9 @@ const ProductPage = () => {
               </button>
             </div>
           ) : null}
+          <p className='font-bold'>
+            Description
+          </p>
           <p
             className="text text-gray-700 font-[montserrat]"
             dangerouslySetInnerHTML={{ __html: product.description }}

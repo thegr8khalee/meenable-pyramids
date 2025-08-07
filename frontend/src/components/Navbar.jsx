@@ -103,7 +103,7 @@ const Navbar = () => {
   };
 
   return (
-    <div className="">
+    <div className="top-0 sticky z-999">
       {/* Mobile View Navbar (visible on lg screens and smaller) */}
       <div className="lg:hidden flex drawer drawer-start z-9999">
         <input
@@ -135,13 +135,7 @@ const Navbar = () => {
           </div>
           <div className="navbar-center">
             <Link to="/" onClick={closeDrawer}>
-              <img
-                src={
-                  'https://res.cloudinary.com/dqe64m85c/image/upload/v1753784164/logoLightMode_g6xdr7.png'
-                }
-                alt="Logo"
-                className="h-12"
-              />
+              <h1 className='text-lg font-[sarina]'>Meenable Pyramids</h1>
             </Link>
           </div>
           <div className="navbar-end">

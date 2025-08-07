@@ -23,12 +23,6 @@ export const getProducts = async (req, res) => {
 
     // 3. Style Filter (NEWLY ADDED)
     // Check if a style query parameter is provided and add it to the query
-    if (req.query.style) {
-      // Use a case-insensitive regex for style matching to handle potential variations
-      // or URL encoding (e.g., 'Antique/Royal' vs 'antique%2Froyal')
-      const styleRegex = new RegExp(req.query.style.replace(/%2F/g, '/'), 'i');
-      query.style = styleRegex;
-    }
 
     // 4. Price Filter (minPrice, maxPrice)
     const minPrice = parseFloat(req.query.minPrice);
