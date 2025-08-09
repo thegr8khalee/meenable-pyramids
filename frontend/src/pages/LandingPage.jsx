@@ -13,7 +13,7 @@ import { motion } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
 import { useAdminStore } from '../store/useAdminStore';
 import { useProductsStore } from '../store/useProductsStore';
-import { ShoppingCart } from 'lucide-react';
+import { ShoppingCart, Star } from 'lucide-react';
 import { useCartStore } from '../store/UseCartStore';
 
 const LandingPage = () => {
@@ -73,7 +73,7 @@ const LandingPage = () => {
     setTimeout(() => {
       window.scrollTo(0, 0);
     }, 10);
-  }
+  };
 
   return (
     <div className="overflow-x-hidden">
@@ -557,10 +557,24 @@ const LandingPage = () => {
                   <h3 className="font-[inter] font-bold capitalize">
                     {product.name}
                   </h3>
-                  <h1
-                    className="text-xs capitalize line-clamp-2"
-                    dangerouslySetInnerHTML={{ __html: product.description }}
-                  ></h1>
+                  <div className="flex items-center space-x-2">
+                    <div className="flex items-center">
+                      {[1, 2, 3, 4, 5].map((star) => (
+                        <Star
+                          key={star}
+                          size={15}
+                          className={`
+                                              ${
+                                                star <= product.averageRating
+                                                  ? 'text-yellow-500 fill-yellow-500 stroke-0'
+                                                  : 'text-gray-300 fill-gray-300 stroke-0'
+                                              }
+                                            `}
+                        />
+                      ))}
+                    </div>
+                    <h1 className='text-xs'>({product.averageRating})</h1>
+                  </div>
                   <div className="w-full justify-between flex items-center mt-1">
                     {product.isPromo &&
                     product.discountedPrice !== undefined ? (
@@ -858,7 +872,8 @@ const LandingPage = () => {
               <div className="w-full h-auto justify-center flex flex-col">
                 <p className="text-2xl lg:text-4xl font-bold">{rod[0].name}</p>
                 {rod[0].description && (
-                  <p className='line-clamp-5'
+                  <p
+                    className="line-clamp-5"
                     dangerouslySetInnerHTML={{ __html: rod[0].description }}
                   ></p>
                 )}

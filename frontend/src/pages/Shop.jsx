@@ -5,7 +5,7 @@ import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { useLocation, useNavigate, Link } from 'react-router-dom';
 import { useProductsStore } from '../store/useProductsStore';
 import { useAuthStore } from '../store/useAuthStore';
-import { Loader2, Filter, Search, ShoppingCart } from 'lucide-react';
+import { Loader2, Filter, Search, ShoppingCart, Star } from 'lucide-react';
 import FilterModal from '../components/FilterModal';
 import whatsapp from '../images/whatsapp.png';
 import { useCartStore } from '../store/UseCartStore';
@@ -136,7 +136,7 @@ const Shop = () => {
     }
   };
 
-  console.log(products)
+  console.log(products);
 
   // Filter modal handlers
   const handleOpenProductFilterModal = () => setIsProductFilterModalOpen(true);
@@ -328,6 +328,26 @@ const Shop = () => {
                           <h2 className="truncate whitespace-nowrap capitalize text-sm">
                             {product.category}
                           </h2>
+                          <div className="flex items-center space-x-2">
+                            <div className="flex items-center">
+                              {[1, 2, 3, 4, 5].map((star) => (
+                                <Star
+                                  key={star}
+                                  size={15}
+                                  className={`
+                                              ${
+                                                star <= product.averageRating
+                                                  ? 'text-yellow-500 fill-yellow-500 stroke-0'
+                                                  : 'text-gray-300 fill-gray-300 stroke-0'
+                                              }
+                                            `}
+                                />
+                              ))}
+                            </div>
+                            <h1 className="text-xs">
+                              ({product.averageRating})
+                            </h1>
+                          </div>
                         </div>
                         <div className="flex justify-between w-full items-center">
                           <div>

@@ -171,8 +171,11 @@ const ProductPage = () => {
   };
 
   const handleDeleteReview = async () => {
-    await deleteReview(productId, myReview._id);
-    await getProductById(productId);
+    if (window.confirm('Are you sure you want to delete your review?')) {
+      await deleteReview(productId, myReview._id);
+
+      getProductById(productId);
+    }
   };
   console.log(product);
 
@@ -314,6 +317,24 @@ const ProductPage = () => {
           <h1 className="text-3xl font-bold font-[inter] capitalize">
             {product.name}
           </h1>
+          <div className="flex items-center space-x-2">
+            <div className="flex items-center">
+              {[1, 2, 3, 4, 5].map((star) => (
+                <Star
+                  key={star}
+                  size={20}
+                  className={`
+                            ${
+                              star <= product.averageRating
+                                ? 'text-yellow-500 fill-yellow-500 stroke-0'
+                                : 'text-gray-300 fill-gray-300 stroke-0'
+                            }
+                          `}
+                />
+              ))}
+            </div>
+            <h1>({product.averageRating})</h1>
+          </div>
 
           {/* Price display */}
           <div className="flex items-baseline space-x-3">
@@ -500,7 +521,28 @@ const ProductPage = () => {
             </div>
           ) : null}
         </div>
-        <h1 className="font-[inter] font-bold text-xl">Customer Reviews</h1>
+        <h1 className="font-[inter] font-bold text-2xl mb-0">
+          Customer Reviews
+        </h1>
+        <div className="flex items-center space-x-2 mb-3">
+          <div className="flex items-center">
+            {[1, 2, 3, 4, 5].map((star) => (
+              <Star
+                key={star}
+                size={30}
+                className={`
+                            ${
+                              star <= product.averageRating
+                                ? 'text-yellow-500 fill-yellow-500 stroke-0'
+                                : 'text-gray-300 fill-gray-300 stroke-0'
+                            }
+                          `}
+              />
+            ))}
+          </div>
+          <h1>({product.averageRating})</h1>
+        </div>
+
         {product.reviews?.length > 0 ? (
           <div>
             {product.reviews.map((review) => (
