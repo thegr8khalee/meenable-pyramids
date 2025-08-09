@@ -23,13 +23,6 @@ export const useProductsStore = create((set, get) => ({
     }
   },
 
-  /**
-   * Fetches products from the backend with pagination and filtering.
-   * @param {number} page - The page number to fetch.
-   * @param {number} limit - The number of items per page.
-   * @param {object} filters - An object containing filter parameters (e.g., { search: 'query', minPrice: 100 }).
-   * @param {boolean} append - If true, new products are appended; otherwise, they replace existing products.
-   */
   getProducts: async (page = 1, limit = 12, filters = {}, append = true) => {
     const currentFilters = get().currentFilters;
     // Check if filters have genuinely changed to trigger a reset
@@ -86,9 +79,6 @@ export const useProductsStore = create((set, get) => ({
     }
   },
 
-  /**
-   * Resets the products state, typically called when filters are cleared or view mode changes.
-   */
   resetProducts: () =>
     set({
       products: [],

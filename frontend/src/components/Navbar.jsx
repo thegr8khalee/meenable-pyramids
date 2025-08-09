@@ -1,8 +1,12 @@
 // src/components/Navbar.jsx
 import {
+  CookingPot,
+  Headset,
   HeartIcon,
+  LucideHome,
   MenuIcon, // For mobile drawer and admin sidebar toggle
   SearchIcon,
+  ShoppingBag,
   ShoppingCart,
   UserIcon, // For profile link
   X, // NEW: Import X icon for close button
@@ -17,6 +21,9 @@ import { useCartStore } from '../store/UseCartStore';
 // import { useCartStore } from '../store/useCartStore';
 // import { useWishlistStore } from '../store/useWishlistStore';
 // import { useProductsStore } from '../store/useProductsStore'; // No longer needed if categories are hardcoded here
+import { TbPepper, TbSalt } from 'react-icons/tb';
+import { LiaPepperHotSolid } from 'react-icons/lia';
+import { GiHerbsBundle } from 'react-icons/gi';
 
 const Navbar = () => {
   const location = useLocation();
@@ -37,10 +44,15 @@ const Navbar = () => {
 
   // Hardcoded categories (moved from useProductsStore import)
   const uniqueCategories = [
-    { id: '1', name: 'Spice', link: 'spice' },
-    { id: '2', name: 'Herbs', link: 'herbs' },
-    { id: '3', name: 'Seasoning', link: 'seasoning' },
-    {id: '4', name: 'Chilli Powder', link: 'chilli powder'}
+    { id: '1', name: 'Spice', link: 'spice', icon: TbPepper },
+    { id: '2', name: 'Herbs', link: 'herbs', icon: GiHerbsBundle },
+    { id: '3', name: 'Seasoning', link: 'seasoning', icon: TbSalt },
+    {
+      id: '4',
+      name: 'Chilli Powder',
+      link: 'chilli powder',
+      icon: LiaPepperHotSolid,
+    },
   ];
 
   const [isDrawerChecked, setIsDrawerChecked] = useState(false);
@@ -121,7 +133,7 @@ const Navbar = () => {
           </div>
           <div className="navbar-center">
             <Link to="/" onClick={closeDrawer}>
-              <h1 className='text-lg font-[sarina]'>Meenable Pyramids</h1>
+              <h1 className="text-lg font-[sarina]">Meenable Pyramids</h1>
             </Link>
           </div>
           <div className="navbar-end">
@@ -159,6 +171,7 @@ const Navbar = () => {
                   className="btn btn-lg font-normal border-0 justify-start"
                   onClick={closeDrawer}
                 >
+                  <LucideHome />
                   Home
                 </Link>
               </li>
@@ -168,6 +181,7 @@ const Navbar = () => {
                   className="btn btn-lg font-normal border-0 justify-start"
                   onClick={closeDrawer}
                 >
+                  <ShoppingBag />
                   Shop
                 </Link>
               </li>
@@ -177,6 +191,7 @@ const Navbar = () => {
                   className="btn btn-lg font-normal border-0 justify-start"
                   onClick={closeDrawer}
                 >
+                  <Headset />
                   Contact Us
                 </Link>
               </li>
@@ -186,24 +201,29 @@ const Navbar = () => {
                   className="btn btn-lg font-normal border-0 justify-start"
                   onClick={closeDrawer}
                 >
-                 Recipes
+                  <CookingPot />
+                  Recipes
                 </Link>
               </li>
             </div>
 
             <>
-              {uniqueCategories.map((category) => (
-                <li key={category.id}>
-                  {' '}
-                  {/* FIX: Added key prop */}
-                  <button
-                    onClick={() => handleCategoryLinkClick(category.link)}
-                    className="btn  font-normal btn-lg border-0 justify-start"
-                  >
-                    {category.name} {/* FIX: Render category.name */}
-                  </button>
-                </li>
-              ))}
+              {uniqueCategories.map((category) => {
+                const IconComponent = category.icon;
+                return (
+                  <li key={category.id} className="flex">
+                    {' '}
+                    {/* FIX: Added key prop */}
+                    <button
+                      onClick={() => handleCategoryLinkClick(category.link)}
+                      className="btn  font-normal btn-lg border-0 justify-start"
+                    >
+                      <IconComponent className="size-7" />
+                      {category.name} {/* FIX: Render category.name */}
+                    </button>
+                  </li>
+                );
+              })}
             </>
 
             {/* Other general navigation links (always visible) */}
@@ -232,7 +252,7 @@ const Navbar = () => {
             Shop
           </Link>
           <Link to="/recipes" className=" border-0 shadow-none btn-ghost">
-           Recipes
+            Recipes
           </Link>
           {/* <Link to="/showroom" className=" border-0 shadow-none btn-ghost">
             Showroom
@@ -279,7 +299,7 @@ const Navbar = () => {
                 onClick={() => handleCartClick()}
               >
                 {cart?.length !== 0 && cart !== null ? (
-                  <div className="absolute right-1 top-0 bg-red-500 text-xs w-4 h-4 rounded-full flex justify-center items-center">
+                  <div className="absolute right-1 top-0 bg-red-500 text-xs text-white w-4 h-4 rounded-full flex justify-center items-center">
                     {cart?.length}
                   </div>
                 ) : null}

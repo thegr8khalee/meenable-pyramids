@@ -83,7 +83,7 @@ const BottomNavbar = () => {
             >
               <IconComponent size={24} className="mb-1" />
               {item.name === 'Cart' && cart?.length !== 0 && cart !== null ? (
-                <div className="absolute right-0 top-0 bg-red-500 text-xs w-4 h-4 rounded-full flex justify-center items-center">
+                <div className="absolute right-0 top-0 bg-red-500 text-xs w-4 h-4 rounded-full flex justify-center items-center text-white">
                   {cart?.length}
                 </div>
               ) : null}

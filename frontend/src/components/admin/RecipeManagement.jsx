@@ -7,17 +7,22 @@ import { useAdminStore } from '../../store/useAdminStore';
 // instead of window.confirm in a production app.
 
 const RecipeManagement = () => {
+  // Destructure pagination states from the store
   const {
     recipes,
     getRecipes,
     isDeletingRecipes,
     isGettingRecipes,
     deleteRecipe,
-    toggleRecipeOfTheDay, // Assuming this new action exists in your store
-    isTogglingRecipeOfTheDay, // Assuming a loading state for the new action
+    toggleRecipeOfTheDay,
+    isTogglingRecipeOfTheDay,
+    hasMoreRecipes,
+    currentPage,
   } = useAdminStore();
 
   useEffect(() => {
+    // Initial fetch of recipes on component mount.
+    // The store's logic will handle fetching the first page.
     getRecipes();
   }, [getRecipes]);
 
@@ -26,7 +31,6 @@ const RecipeManagement = () => {
   // Use useMemo to sort the recipes. The sorting will only re-run when
   // the 'recipes' array changes, improving performance.
   const sortedRecipes = useMemo(() => {
-    // Return a new sorted array to avoid mutating the original store state
     const sorted = [...recipes].sort((a, b) => {
       // Prioritize the recipe of the day
       if (a.isRecipeOfTheDay && !b.isRecipeOfTheDay) return -1;
@@ -45,9 +49,11 @@ const RecipeManagement = () => {
   };
 
   const handleDeleteProduct = async (recipeId) => {
-    // IMPORTANT: In a production app, use a custom modal instead of
-    // window.confirm, as it can be a bad user experience.
-    if (window.confirm('Are you sure you want to delete this recipe? This action cannot be undone.')) {
+    if (
+      window.confirm(
+        'Are you sure you want to delete this recipe? This action cannot be undone.'
+      )
+    ) {
       const success = await deleteRecipe(recipeId);
       if (success) {
         // toast.success('Product deleted successfully!');
@@ -58,18 +64,13 @@ const RecipeManagement = () => {
   };
 
   const handleToggleRecipeOfTheDay = async (recipeId, currentStatus) => {
-    // Assuming a store action that makes an API call to update the status
     await toggleRecipeOfTheDay(recipeId, !currentStatus);
   };
 
-  if (isGettingRecipes) {
-    return (
-      <div className="text-center p-4">
-        <Loader2 className="h-8 w-8 animate-spin text-primary mx-auto" />
-        <span className="mt-2">Loading Data...</span>
-      </div>
-    );
-  }
+  const handleLoadMore = () => {
+    // Call getRecipes with the next page number to fetch more
+    getRecipes(currentPage + 1);
+  };
 
   return (
     <div>
@@ -84,61 +85,108 @@ const RecipeManagement = () => {
       </button>
 
       <div className="overflow-x-auto w-full">
-        <table className="table w-full table-fixed text-left">
-          <thead>
-            <tr>
-              <th className="px-4 py-2 w-1/3">Name</th>
-              <th className="px-4 py-2 w-1/3">Recipe of the Day</th>
-              <th className="px-4 py-2 w-1/3 text-center">
-                Actions
-              </th>
-            </tr>
-          </thead>
-          <tbody>
-            {sortedRecipes.map((recipe) => (
-              <tr key={recipe._id} className="border-b">
-                <td className="px-4 py-2 text-ellipsis overflow-hidden whitespace-nowrap">{recipe.name}</td>
-                <td className="px-4 py-2">
-                  <button
-                    className={`font-[inter] btn btn-sm rounded-none shadow-none w-full ${
-                      recipe.isRecipeOfTheDay ? 'btn-primary text-white' : 'btn-outline btn-primary'
-                    }`}
-                    onClick={() => handleToggleRecipeOfTheDay(recipe._id, recipe.isRecipeOfTheDay)}
-                    disabled={isTogglingRecipeOfTheDay} // Disable while the request is in progress
-                  >
-                    {isTogglingRecipeOfTheDay ? (
-                      <Loader2 className="animate-spin" />
-                    ) : (
-                      recipe.isRecipeOfTheDay ? 'Remove as ROD' : 'Set as ROD'
-                    )}
-                  </button>
-                </td>
-                <td className="px-4 py-2">
-                  <div className="flex gap-2 justify-center">
+        {/* Loading indicator for the initial fetch */}
+        {isGettingRecipes && currentPage === 0 && (
+          <div className="flex justify-center items-center p-4 min-h-[300px]">
+            <Loader2 className="h-8 w-8 animate-spin text-primary" />
+            <span className="ml-2 text-primary">Loading data...</span>
+          </div>
+        )}
+
+        {/* Hide table on initial load to prevent empty table flash */}
+        {!isGettingRecipes || currentPage > 0 ? (
+          <table className="table w-full table-fixed text-left">
+            <thead>
+              <tr className="border-b-2 border-base-content">
+                <th className="px-4 py-2 w-1/3">Name</th>
+                <th className="px-4 py-2 w-1/3">Recipe of the Day</th>
+                <th className="px-4 py-2 w-1/3 text-center">Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              {sortedRecipes.map((recipe) => (
+                <tr key={recipe._id} className="border-b border-base-content">
+                  <td className="px-4 py-2 text-ellipsis overflow-hidden whitespace-nowrap">
+                    {recipe.name}
+                  </td>
+                  <td className="px-4 py-2">
                     <button
-                      className="btn btn-circle btn-primary text-white"
-                      onClick={() => handleEditProduct(recipe._id)}
+                      className={`font-[inter] btn btn-sm rounded-none shadow-none w-full ${
+                        recipe.isRecipeOfTheDay
+                          ? 'btn-primary text-white'
+                          : 'btn-outline btn-primary'
+                      }`}
+                      onClick={() =>
+                        handleToggleRecipeOfTheDay(
+                          recipe._id,
+                          recipe.isRecipeOfTheDay
+                        )
+                      }
+                      disabled={isTogglingRecipeOfTheDay}
                     >
-                      <Pen />
-                    </button>
-                    <button
-                      className="btn btn-circle btn-error"
-                      onClick={() => handleDeleteProduct(recipe._id)}
-                      disabled={isDeletingRecipes}
-                    >
-                      {isDeletingRecipes ? (
+                      {isTogglingRecipeOfTheDay ? (
                         <Loader2 className="animate-spin" />
+                      ) : recipe.isRecipeOfTheDay ? (
+                        'Remove as ROD'
                       ) : (
-                        <Trash2 />
+                        'Set as ROD'
                       )}
                     </button>
-                  </div>
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
+                  </td>
+                  <td className="px-4 py-2">
+                    <div className="flex gap-2 justify-center">
+                      <button
+                        className="btn btn-circle btn-primary text-white"
+                        onClick={() => handleEditProduct(recipe._id)}
+                      >
+                        <Pen size={18} />
+                      </button>
+                      <button
+                        className="btn btn-circle btn-error"
+                        onClick={() => handleDeleteProduct(recipe._id)}
+                        disabled={isDeletingRecipes}
+                      >
+                        {isDeletingRecipes ? (
+                          <Loader2
+                            className="animate-spin text-white"
+                            size={18}
+                          />
+                        ) : (
+                          <Trash2 size={18} />
+                        )}
+                      </button>
+                    </div>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        ) : null}
       </div>
+
+      {/* "Load More" button for pagination */}
+      {hasMoreRecipes && (
+        <div className="mt-6 flex justify-center">
+          <button
+            className="btn btn-outline btn-primary rounded-none shadow-none w-full"
+            onClick={handleLoadMore}
+            disabled={isGettingRecipes}
+          >
+            {isGettingRecipes && currentPage > 0 ? (
+              <Loader2 className="animate-spin" size={24} />
+            ) : (
+              'Load More Recipes'
+            )}
+          </button>
+        </div>
+      )}
+
+      {/* Show message if there are no recipes */}
+      {!isGettingRecipes && recipes.length === 0 && (
+        <div className="text-center p-8 text-lg text-gray-500">
+          No recipes found. Add a new recipe to get started!
+        </div>
+      )}
     </div>
   );
 };

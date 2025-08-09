@@ -1,8 +1,9 @@
 // models/Product.js
 import mongoose from 'mongoose';
-
+import Recipe from './recipe.model.js';
 const reviewSchema = new mongoose.Schema({
   userId: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true },
+  name: { type: String, required: true, trim: true },
   rating: { type: Number, required: true, min: 1, max: 5 },
   comment: { type: String, trim: true },
   createdAt: { type: Date, default: Date.now },
@@ -56,6 +57,24 @@ productSchema.pre('save', function (next) {
     this.averageRating = 0;
   }
   next();
+});
+
+productSchema.post('save', async function (doc, next) {
+  // `this` refers to the product document that was just saved
+  try {
+    // Find all recipes that contain this product's ID in their ingredients array
+    const recipesToUpdate = await Recipe.find({ ingredients: doc._id });
+
+    // Iterate through the found recipes and save each one.
+    // The Recipe's pre-save hook will then automatically recalculate the price.
+    for (const recipe of recipesToUpdate) {
+      await recipe.save();
+    }
+    next();
+  } catch (error) {
+    console.error(`Error in post-save hook for product ${doc._id}:`, error);
+    next(error);
+  }
 });
 
 const Product = mongoose.model('Product', productSchema);

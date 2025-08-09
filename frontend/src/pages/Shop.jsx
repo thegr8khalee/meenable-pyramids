@@ -136,6 +136,8 @@ const Shop = () => {
     }
   };
 
+  console.log(products)
+
   // Filter modal handlers
   const handleOpenProductFilterModal = () => setIsProductFilterModalOpen(true);
   const handleCloseProductFilterModal = () =>
@@ -198,7 +200,7 @@ const Shop = () => {
       <div className="px-4 sm:px-6 lg:px-8">
         {/* Product Category Switch */}
         <div className="flex justify-center my-5">
-          <div className="tabs tabs-boxed space-x-4">
+          <div className="tabs tabs-boxed justify-center space-x-4">
             <button
               type="button"
               className={`btn tab rounded-none shadow-none border-none ${
@@ -309,16 +311,21 @@ const Shop = () => {
                         }}
                       />
                     </button>
+                    {product.isBestSeller ? (
+                      <div className="absolute top-3 left-3 rounded-full p-1 text-white text-sm bg-green-500">
+                        Best Seller
+                      </div>
+                    ) : null}
                   </figure>
 
                   <div className="p-2">
                     <div className="flex items-center justify-between">
                       <div className="w-full">
                         <div>
-                          <h2 className="text-lg truncate whitespace-nowrap">
+                          <h2 className="text-lg truncate whitespace-nowrap capitalize">
                             {product.name}
                           </h2>
-                          <h2 className="text-lg truncate whitespace-nowrap capitalize">
+                          <h2 className="truncate whitespace-nowrap capitalize text-sm">
                             {product.category}
                           </h2>
                         </div>
@@ -398,7 +405,7 @@ const Shop = () => {
               <button
                 type="button"
                 onClick={handleLoadMoreProducts}
-                className="mb-4 btn text-white bg-primary px-8 py-3 rounded-full font-semibold"
+                className="mb-4 btn text-white bg-primary px-8 py-3 rounded-none font-semibold"
               >
                 {!isGettingProducts ? (
                   'Load More'

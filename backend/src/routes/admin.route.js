@@ -12,7 +12,6 @@ import {
   editRecipe,
   getAllUsers,
   getRecipeById,
-  getRecipes,
   toggleRodd,
   updateProduct,
 } from '../controller/admin.controller.js';
@@ -40,7 +39,5 @@ router.get('/operations/getUsers', protectAdminRoute, getAllUsers);
 router.post('/operations/recipe/new', protectAdminRoute, addRecipe);
 router.post('/operations/recipe/edit', protectAdminRoute, editRecipe);
 router.delete('/operations/recipe/remove', protectAdminRoute, delRecipe);
-router.get('/operations/recipe/get', protectAdminRoute, getRecipes);
-router.get('/operations/recipe/get/:recipeId', protectAdminRoute, getRecipeById);
-router.put('/operations/recipe/rodd/:recipeId', protectAdminRoute, toggleRodd)
+router.put('/operations/recipe/rodd/:recipeId', protectAdminRoute, toggleRodd);
 export default router;

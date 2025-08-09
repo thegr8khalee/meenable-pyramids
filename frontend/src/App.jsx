@@ -23,6 +23,8 @@ import CookieConsentBanner from './components/CookieConsentBanner';
 import BottomNavbar from './components/BottomNavbar';
 import AdminAddRecipePage from './pages/AddRecipePage';
 import AdminEditRecipePage from './pages/EditRecipePage';
+import Recipes from './pages/Recipes';
+import RecipePage from './pages/RecipePage';
 
 function App() {
   const { checkAuth, authUser, isAdmin, isAuthReady } = useAuthStore();
@@ -40,7 +42,9 @@ function App() {
         <Routes>
           <Route path="/" element={<LandingPage />} />
           <Route path="/shop" element={<Shop />} />
+          <Route path="/recipes" element={<Recipes />} />
           <Route path="/product/:productId" element={<ProductPage />} />
+          <Route path="/recipe/:recipeId" element={<RecipePage />} />
           <Route path="/cart" element={<CartPage />} />
           <Route
             path="/profile"

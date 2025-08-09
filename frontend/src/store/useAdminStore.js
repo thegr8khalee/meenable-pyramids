@@ -23,6 +23,11 @@ export const useAdminStore = create((set, get) => ({
   recipeError: null,
   isTogglingRecipeOfTheDay: false,
 
+  hasMoreUsers: true,
+  hasMoreRecipes: true,
+  currentPage: 0,
+  currentPageUsers: 0,
+
   // Action to toggle sidebar visibility
   toggleSidebar: () =>
     set((state) => ({ isSidebarOpen: !state.isSidebarOpen })),
@@ -118,62 +123,92 @@ export const useAdminStore = create((set, get) => ({
     }
   },
 
-  getAllUsers: async () => {
-    // 1. Set loading state to true
-    set({ isGettingUsers: true });
+  getAllUsers: async (page = 1, limit = 50, append = true) => {
+    // 1. Prevent redundant fetches: if already loading, or no more users
+    if (get().isGettingUsers || !get().hasMoreUsers) {
+      return;
+    }
+
+    set({ isGettingUsers: true, usersError: null });
 
     // 2. Security check: Only proceed if the user is an admin
     const { isAdmin } = useAuthStore.getState();
     if (!isAdmin) {
-      toast.error('You do not have permission to view users.');
+      // toast.error('You do not have permission to view users.');
       set({ isGettingUsers: false });
       return;
     }
 
     try {
-      // 3. Make the API call to the backend endpoint
-      const res = await axiosInstance.get('/admin/operations/getUsers');
+      // 3. Make the API call with pagination query parameters
+      const queryParams = new URLSearchParams({
+        page: page,
+        limit: limit,
+      }).toString();
+      const res = await axiosInstance.get(
+        `/admin/operations/getUsers?${queryParams}`
+      );
+      const { users: newUsers, hasMore, totalUsers } = res.data;
 
       // 4. Update the store state with the fetched users
-      set({ users: res.data.users });
-      set({ usersCount: res.data.count });
+      set((state) => ({
+        users: append ? [...state.users, ...newUsers] : newUsers,
+        currentPageUsers: page,
+        hasMoreUsers: hasMore,
+        usersCount: totalUsers,
+      }));
     } catch (error) {
       console.error('Error fetching users:', error);
       const errorMessage =
         error.response?.data?.message || 'Failed to fetch users.';
-      set({ usersError: errorMessage });
-      toast.error(errorMessage);
+      set({ usersError: errorMessage, hasMoreUsers: false }); // Stop further loading on error
+      // toast.error(errorMessage);
     } finally {
-      // 6. Reset the loading state
+      // 5. Reset the loading state
       set({ isGettingUsers: false });
     }
   },
 
-  getRecipes: async () => {
+  getRecipes: async (page = 1, limit = 12, append = true) => {
+    // Prevent redundant fetches
+    if (get().isGettingRecipes || !get().hasMoreRecipes) {
+      return;
+    }
+
     set({ isGettingRecipes: true, recipeError: null });
+
     try {
-      const res = await axiosInstance.get('/admin/operations/recipe/get');
-      set({ recipes: res.data });
+      // Construct query parameters
+      const queryParams = new URLSearchParams({
+        page: page,
+        limit: limit,
+      }).toString();
+
+      const res = await axiosInstance.get(
+        `/products/recipe/get?${queryParams}`
+      );
+      const { recipes: newRecipes, hasMore } = res.data;
+
+      set((state) => ({
+        recipes: append ? [...state.recipes, ...newRecipes] : newRecipes,
+        currentPage: page,
+        hasMoreRecipes: hasMore,
+      }));
     } catch (error) {
       console.error('Error fetching recipes:', error);
       const errorMessage =
         error.response?.data?.message || 'Failed to fetch recipes.';
-      set({ recipeError: errorMessage });
-      toast.error(errorMessage);
+      set({ recipeError: errorMessage, hasMoreRecipes: false });
+      // toast.error(errorMessage);
     } finally {
       set({ isGettingRecipes: false });
     }
   },
 
-  /**
-   * Fetches a single recipe by its ID.
-   * @param {string} id - The ID of the recipe to fetch.
-   * @returns {object|null} The fetched recipe object or null if not found.
-   */
   getRecipeById: async (id) => {
     set({ isGettingSingleRecipe: true, recipeError: null });
     try {
-      const res = await axiosInstance.get(`/admin/operations/recipe/get/${id}`);
+      const res = await axiosInstance.get(`/products/recipe/get/${id}`);
       // Return the single recipe data directly
       set({ recipe: res.data });
     } catch (error) {
@@ -188,10 +223,6 @@ export const useAdminStore = create((set, get) => ({
     }
   },
 
-  /**
-   * Adds a new recipe.
-   * @param {object} recipeData - The recipe data (name, description, ingredients, image).
-   */
   addRecipe: async (recipeData) => {
     set({ isAddingRecipe: true, recipeError: null });
     try {
@@ -212,10 +243,6 @@ export const useAdminStore = create((set, get) => ({
     }
   },
 
-  /**
-   * Edits an existing recipe.
-   * @param {object} recipeData - The updated recipe data including the _id.
-   */
   editRecipe: async (recipeData) => {
     set({ isUpdatingRecipe: true, recipeError: null });
     try {
@@ -240,10 +267,6 @@ export const useAdminStore = create((set, get) => ({
     }
   },
 
-  /**
-   * Deletes a recipe by its ID.
-   * @param {string} _id - The ID of the recipe to delete.
-   */
   deleteRecipe: async (_id) => {
     set({ isDeletingRecipe: true, recipeError: null });
     try {
@@ -269,9 +292,12 @@ export const useAdminStore = create((set, get) => ({
     set({ isTogglingRecipeOfTheDay: true, adminError: null });
     try {
       // API call to update the recipe
-      const response = await axiosInstance.put(`/admin/operations/recipe/rodd/${recipeId}`, {
-        isRecipeOfTheDay: status,
-      });
+      const response = await axiosInstance.put(
+        `/admin/operations/recipe/rodd/${recipeId}`,
+        {
+          isRecipeOfTheDay: status,
+        }
+      );
 
       const updatedRecipe = response.data.recipe;
 
@@ -292,7 +318,9 @@ export const useAdminStore = create((set, get) => ({
       set({ recipes: updatedRecipes, isTogglingRecipeOfTheDay: false });
     } catch (error) {
       set({
-        adminError: error.response?.data?.message || 'Failed to toggle Recipe of the Day.',
+        adminError:
+          error.response?.data?.message ||
+          'Failed to toggle Recipe of the Day.',
         isTogglingRecipeOfTheDay: false,
       });
       return false;

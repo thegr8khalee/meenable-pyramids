@@ -1,5 +1,6 @@
 import mongoose from 'mongoose';
 import Product from '../models/product.model.js';
+import Recipe from '../models/recipe.model.js';
 
 export const getProducts = async (req, res) => {
   try {
@@ -106,6 +107,36 @@ export const getProductById = async (req, res) => {
     res.status(200).json(product);
   } catch (error) {
     console.error('Error in getProductById controller: ', error.message);
+    res.status(500).json({ message: 'Internal Server Error' });
+  }
+};
+
+export const getRecipes = async (req, res) => {
+  try {
+    const page = parseInt(req.query.page) || 1; // Default to page 1
+    const limit = parseInt(req.query.limit) || 12; // Default to 12 items per page
+    const skip = (page - 1) * limit;
+
+    // Get total count of all recipes
+    const totalRecipes = await Recipe.countDocuments({});
+
+    // Fetch recipes with pagination, populating the ingredient names
+    const recipes = await Recipe.find({})
+      .populate('ingredients', 'name')
+      .skip(skip)
+      .limit(limit);
+
+    // Determine if there are more pages/items available
+    const hasMore = page * limit < totalRecipes;
+    
+    res.status(200).json({
+      recipes,
+      currentPage: page,
+      totalRecipes,
+      hasMore,
+    });
+  } catch (error) {
+    console.error('Error in getRecipes controller:', error.message);
     res.status(500).json({ message: 'Internal Server Error' });
   }
 };

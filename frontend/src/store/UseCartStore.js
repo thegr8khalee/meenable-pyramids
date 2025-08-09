@@ -246,6 +246,38 @@ export const useCartStore = create((set, get) => ({
     }
   },
 
+  addRecipeToCart: async (recipe) => {
+    const { addToCart } = get();
+    // A single loading state for adding a whole recipe
+    set({ isAddingToCart: true, cartError: null });
+
+    if (!recipe || !recipe.ingredients || recipe.ingredients.length === 0) {
+      toast.error('Cannot add an empty or invalid recipe to the cart.');
+      set({ isAddingToCart: false });
+      return;
+    }
+
+    try {
+      const promises = recipe.ingredients.map((product) =>
+        // Call the existing addToCart function for each product in the recipe
+        addToCart(product._id, 1, 'Product')
+      );
+      // Wait for all ingredients to be added
+      await Promise.all(promises);
+      toast.success(
+        `All ingredients from '${recipe.name}' have been added to your cart!`
+      );
+    } catch (error) {
+      console.error('Error adding recipe to cart:', error);
+      toast.error(
+        'Failed to add all ingredients from the recipe to your cart.'
+      );
+    } finally {
+      // Reset the loading state once all items are processed
+      set({ isAddingToCart: false });
+    }
+  },
+
   removeFromCart: async (itemId, itemType = 'Product') => {
     set({ isRemovingFromCart: true, cartError: null });
     if (!itemType) {

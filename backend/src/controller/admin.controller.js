@@ -409,12 +409,20 @@ export const delProduct = async (req, res) => {
   }
 
   try {
+    // Step 1: Delete all recipes that contain the product
+    // The query uses `ingredients` as per your provided Recipe schema.
+    const deletedRecipes = await Recipe.deleteMany({ ingredients: productId });
+    console.log(
+      `Deleted ${deletedRecipes.deletedCount} recipes containing product: ${productId}`
+    );
+
+    // Step 2: Find and delete the product
     const product = await Product.findById(productId);
     if (!product) {
       return res.status(404).json({ message: 'Product not found.' });
     }
 
-    // Delete associated images from Cloudinary using their public_ids
+    // Step 3: Delete associated images from Cloudinary using their public_ids
     for (const image of product.images) {
       if (image.public_id) {
         // Only delete if public_id exists
@@ -423,6 +431,7 @@ export const delProduct = async (req, res) => {
       }
     }
 
+    // Step 4: Delete the product itself from the database
     await Product.deleteOne({ _id: productId }); // Use deleteOne for clarity
 
     res.status(200).json({ message: 'Product deleted successfully.' });
@@ -434,14 +443,30 @@ export const delProduct = async (req, res) => {
 
 export const getAllUsers = async (req, res) => {
   try {
-    const users = await User.find({}).select('-password');
+    const page = parseInt(req.query.page) || 1;
+    const limit = parseInt(req.query.limit) || 50; // Set default limit to 50
+    const skip = (page - 1) * limit;
+
+    // Get the total count of all users
+    const totalUsers = await User.countDocuments({});
+
+    // Fetch users with pagination, selecting all fields except the password
+    const users = await User.find({})
+      .select('-password')
+      .skip(skip)
+      .limit(limit);
+
+    // Determine if there are more pages/items available
+    const hasMore = page * limit < totalUsers;
+
     return res.status(200).json({
       success: true,
-      count: users.length,
       users,
+      currentPage: page,
+      totalUsers,
+      hasMore,
     });
   } catch (error) {
-    // 4. Handle any database or server-side errors.
     console.error('Error fetching all users:', error);
     return res.status(500).json({
       success: false,
@@ -453,14 +478,13 @@ export const getAllUsers = async (req, res) => {
 export const addRecipe = async (req, res) => {
   const { name, description, ingredients, image, rodd } = req.body;
 
-  console.log(rodd)
   // Basic validation
   if (
     !name ||
     !description ||
     !ingredients ||
     ingredients.length === 0 ||
-    !image || !rodd
+    !image
   ) {
     return res.status(400).json({
       message:
@@ -489,7 +513,7 @@ export const addRecipe = async (req, res) => {
       description,
       ingredients,
       image: uploadedImage,
-      isRecipeOfTheDay: rodd
+      isRecipeOfTheDay: rodd,
     });
 
     const savedRecipe = await newRecipe.save();
@@ -497,8 +521,8 @@ export const addRecipe = async (req, res) => {
     // Populate ingredients to return a more complete object
     const populatedRecipe = await Recipe.findById(savedRecipe._id).populate(
       'ingredients',
-      'name'
-    ); // Only populate the product name for a lighter response
+      'name price isPromo discountedPrice' // Populate fields needed for a more useful response
+    );
 
     res.status(201).json(populatedRecipe);
   } catch (error) {
@@ -513,15 +537,9 @@ export const addRecipe = async (req, res) => {
   }
 };
 
-/**
- * @desc    Edit an existing recipe
- * @route   POST /operations/recipe/edit
- * @access  Private (Admin)
- */
 export const editRecipe = async (req, res) => {
   const { _id, name, description, ingredients, image, rodd } = req.body;
 
-  console.log(rodd)
   if (!_id || !mongoose.Types.ObjectId.isValid(_id)) {
     return res
       .status(400)
@@ -559,7 +577,7 @@ export const editRecipe = async (req, res) => {
         image: updatedImage,
       },
       { new: true, runValidators: true }
-    ).populate('ingredients', 'name');
+    ).populate('ingredients', 'name price isPromo discountedPrice');
 
     if (!updatedRecipe) {
       return res.status(404).json({ message: 'Recipe not found.' });
@@ -578,11 +596,6 @@ export const editRecipe = async (req, res) => {
   }
 };
 
-/**
- * @desc    Delete a recipe
- * @route   DELETE /operations/recipe/remove
- * @access  Private (Admin)
- */
 export const delRecipe = async (req, res) => {
   const { _id } = req.body;
 
@@ -613,26 +626,6 @@ export const delRecipe = async (req, res) => {
   }
 };
 
-/**
- * @desc    Get all recipes
- * @route   GET /operations/recipe/get
- * @access  Private (Admin)
- */
-export const getRecipes = async (req, res) => {
-  try {
-    const recipes = await Recipe.find({}).populate('ingredients', 'name');
-    res.status(200).json(recipes);
-  } catch (error) {
-    console.error('Error in getRecipes controller:', error.message);
-    res.status(500).json({ message: 'Internal Server Error' });
-  }
-};
-
-/**
- * @desc    Get a single recipe by ID
- * @route   GET /operations/recipe/get/:Id
- * @access  Private (Admin)
- */
 export const getRecipeById = async (req, res) => {
   const { recipeId } = req.params;
 
@@ -641,7 +634,10 @@ export const getRecipeById = async (req, res) => {
   }
 
   try {
-    const recipe = await Recipe.findById(recipeId).populate('ingredients', 'name');
+    const recipe = await Recipe.findById(recipeId).populate(
+      'ingredients',
+      'name'
+    );
     if (!recipe) {
       return res.status(404).json({ message: 'Recipe not found.' });
     }
@@ -653,7 +649,7 @@ export const getRecipeById = async (req, res) => {
 };
 
 export const toggleRodd = async (req, res) => {
-    try {
+  try {
     const { recipeId } = req.params;
     const { isRecipeOfTheDay } = req.body;
 
@@ -672,4 +668,4 @@ export const toggleRodd = async (req, res) => {
     console.error('Error toggling Recipe of the Day:', error);
     res.status(500).json({ message: 'Server error.', error: error.message });
   }
-}
+};

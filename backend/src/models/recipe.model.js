@@ -1,5 +1,5 @@
-// src/models/Recipe.js
 import mongoose from 'mongoose';
+import Product from './product.model.js'; // Import the Product model to access pricing details
 
 const { Schema } = mongoose;
 
@@ -47,28 +47,52 @@ const RecipeSchema = new Schema(
       type: Boolean,
       default: false,
     },
+    // NEW: Add a price field to the schema
+    price: {
+      type: Number,
+      default: 0,
+      min: 0,
+    },
   },
   {
     timestamps: true,
   }
 );
 
-// Pre-save hook to ensure only one recipe is marked as "Recipe of the Day"
+// Pre-save hook to calculate the total price and ensure only one "Recipe of the Day"
 RecipeSchema.pre('save', async function (next) {
-  // Check if this recipe is being set as the new "Recipe of the Day"
-  if (this.isModified('isRecipeOfTheDay') && this.isRecipeOfTheDay) {
-    try {
-      // Find the old "Recipe of the Day" and set its flag to false
+  try {
+    // Check if this recipe is being set as the new "Recipe of the Day"
+    if (this.isModified('isRecipeOfTheDay') && this.isRecipeOfTheDay) {
       await this.constructor.updateMany(
         { _id: { $ne: this._id }, isRecipeOfTheDay: true },
         { isRecipeOfTheDay: false }
       );
-      next();
-    } catch (error) {
-      next(error);
     }
-  } else {
+
+    // NEW: Calculate the total price of all ingredients
+    // IMPORTANT: This calculation assumes a quantity of 1 for each ingredient
+    // because the schema only stores product IDs, not quantities.
+    let totalCost = 0;
+    if (this.ingredients && this.ingredients.length > 0) {
+      const productDetails = await Product.find({
+        _id: { $in: this.ingredients },
+      });
+
+      for (const product of productDetails) {
+        // Use discountedPrice if a product is on promo, otherwise use the regular price
+        const effectivePrice = product.isPromo
+          ? product.discountedPrice
+          : product.price;
+        totalCost += effectivePrice; // Assumes quantity of 1
+      }
+    }
+    this.price = totalCost;
+
     next();
+  } catch (error) {
+    console.error('Error in Recipe pre-save hook:', error);
+    next(error);
   }
 });
 
