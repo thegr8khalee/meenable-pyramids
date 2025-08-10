@@ -169,9 +169,11 @@ export const useAdminStore = create((set, get) => ({
     }
   },
 
-  getRecipes: async (page = 1, limit = 12, append = true) => {
+  getRecipes: async (page = 1, limit = 12, append = true, search = '') => {
+    const { isGettingRecipes, hasMoreRecipes } = get();
+
     // Prevent redundant fetches
-    if (get().isGettingRecipes || !get().hasMoreRecipes) {
+    if (isGettingRecipes || (!hasMoreRecipes && append)) {
       return;
     }
 
@@ -182,10 +184,14 @@ export const useAdminStore = create((set, get) => ({
       const queryParams = new URLSearchParams({
         page: page,
         limit: limit,
-      }).toString();
+      });
+      // Add the search term to the query if it's not an empty string
+      if (search) {
+        queryParams.append('search', search);
+      }
 
       const res = await axiosInstance.get(
-        `/products/recipe/get?${queryParams}`
+        `/products/recipe/get?${queryParams.toString()}`
       );
       const { recipes: newRecipes, hasMore } = res.data;
 
@@ -199,7 +205,6 @@ export const useAdminStore = create((set, get) => ({
       const errorMessage =
         error.response?.data?.message || 'Failed to fetch recipes.';
       set({ recipeError: errorMessage, hasMoreRecipes: false });
-      // toast.error(errorMessage);
     } finally {
       set({ isGettingRecipes: false });
     }

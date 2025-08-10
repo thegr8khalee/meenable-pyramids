@@ -10,6 +10,7 @@ import FilterModal from '../components/FilterModal';
 import whatsapp from '../images/whatsapp.png';
 import { useCartStore } from '../store/UseCartStore';
 import { useAdminStore } from '../store/useAdminStore';
+
 const ITEMS_PER_PAGE = 12;
 
 const Recipes = () => {
@@ -17,49 +18,53 @@ const Recipes = () => {
   const navigate = useNavigate();
 
   const { isAdmin, checkAuth, isAuthReady } = useAuthStore();
-  const {
-    addRecipeToCart,
-  } = useCartStore();
+  const { addRecipeToCart } = useCartStore();
 
   const { recipes, getRecipes, isGettingRecipes, hasMoreRecipes } =
     useAdminStore();
 
-  // const handleAddToCart = (id, quantity, type) => {
-  //   addToCart(id, quantity, type);
-  // };
-
-  // View Mode State ('spice', 'herbs', or 'seasoning')
-  const [viewMode, setViewMode] = useState('spice');
-
-  // Filter States
+  // Search States
   const productSearchInputRef = useRef(null);
   const [productSearchQuery, setProductSearchQuery] = useState('');
 
   // Pagination
   const [localPageProduct, setLocalPageProduct] = useState(1);
 
-  // Initial Auth Check
+  // Initial Auth Check and Data Fetch
   useEffect(() => {
     checkAuth();
-    getRecipes();
-  }, [checkAuth, getRecipes]);
+    // Pass the search query string directly, not an object
+    getRecipes(1, ITEMS_PER_PAGE, false, productSearchQuery);
+  }, [checkAuth, getRecipes, productSearchQuery]); // Add productSearchQuery as a dependency
+
+  // This effect will trigger a new search whenever the productSearchQuery state changes
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      // Reset page to 1 and fetch new data
+      setLocalPageProduct(1);
+      getRecipes(1, ITEMS_PER_PAGE, false, productSearchQuery);
+    }, 500); // 500ms debounce
+
+    // Cleanup function to clear the timer on re-render
+    return () => clearTimeout(timer);
+  }, [productSearchQuery, getRecipes]);
 
   console.log(recipes);
   // URL Param Handling
-  useEffect(() => {
-    const queryParams = new URLSearchParams(location.search);
-    const viewFromUrl = queryParams.get('view');
+  // useEffect(() => {
+  //   const queryParams = new URLSearchParams(location.search);
+  //   const viewFromUrl = queryParams.get('view');
 
-    if (viewFromUrl === 'herbs') {
-      setViewMode('herbs');
-    } else if (viewFromUrl === 'seasoning') {
-      setViewMode('seasoning');
-    } else if (viewFromUrl === 'chilli powder') {
-      setViewMode('chilli powder');
-    } else {
-      setViewMode('spice');
-    }
-  }, [location.search]);
+  //   if (viewFromUrl === 'herbs') {
+  //     setViewMode('herbs');
+  //   } else if (viewFromUrl === 'seasoning') {
+  //     setViewMode('seasoning');
+  //   } else if (viewFromUrl === 'chilli powder') {
+  //     setViewMode('chilli powder');
+  //   } else {
+  //     setViewMode('spice');
+  //   }
+  // }, [location.search]);
 
   // Search Bar Focus
   useEffect(() => {
@@ -69,11 +74,12 @@ const Recipes = () => {
     }
   }, [location.state?.focusSearch, navigate, location.pathname]);
 
-  // // Load more products
+  // Load more products
   const handleLoadMoreRecipes = () => {
     if (!isGettingRecipes && hasMoreRecipes) {
       const nextPage = localPageProduct + 1;
-      getRecipes(nextPage, ITEMS_PER_PAGE, true);
+      // Pass the search query string directly
+      getRecipes(nextPage, ITEMS_PER_PAGE, true, productSearchQuery);
       setLocalPageProduct(nextPage);
     }
   };
@@ -126,7 +132,6 @@ const Recipes = () => {
       </div>
 
       <div className="px-4 sm:px-6 lg:px-8">
-        {/* Product Category Switch */}
         <>
           <div className="sm:flex w-full my-5 items-center">
             {/* Search Bar */}
@@ -219,9 +224,7 @@ const Recipes = () => {
                                 <button
                                   type="button"
                                   className="btn text-white rounded-none bg-primary shadow-none border-none"
-                                  onClick={() =>
-                                    handleAddRecipeToCart(product)
-                                  }
+                                  onClick={() => handleAddRecipeToCart(product)}
                                 >
                                   <ShoppingCart className="" />
                                 </button>

@@ -97,8 +97,10 @@ export const getProductById = async (req, res) => {
   }
 
   try {
-    const product = await Product.findById(productId)
-      .populate('reviews.userId', 'username'); // Populate username for reviews
+    const product = await Product.findById(productId).populate(
+      'reviews.userId',
+      'username'
+    ); // Populate username for reviews
 
     if (!product) {
       return res.status(404).json({ message: 'Product not found.' });
@@ -117,18 +119,30 @@ export const getRecipes = async (req, res) => {
     const limit = parseInt(req.query.limit) || 12; // Default to 12 items per page
     const skip = (page - 1) * limit;
 
-    // Get total count of all recipes
-    const totalRecipes = await Recipe.countDocuments({});
+    // --- Build Mongoose Query Object for Filtering ---
+    let query = {};
 
-    // Fetch recipes with pagination, populating the ingredient names
-    const recipes = await Recipe.find({})
+    // 1. Search Query Filter (by name)
+    // If a search query is provided, create a case-insensitive regex and add it to the query object
+    if (req.query.search && req.query.search.trim() !== '') {
+      const searchRegex = new RegExp(req.query.search, 'i');
+      query.name = searchRegex;
+    }
+
+    // --- End Filtering Logic ---
+
+    // Get total count of all recipes matching the applied filters
+    const totalRecipes = await Recipe.countDocuments(query);
+
+    // Fetch recipes with the search filter and pagination, populating the ingredient names
+    const recipes = await Recipe.find(query)
       .populate('ingredients', 'name')
       .skip(skip)
       .limit(limit);
 
     // Determine if there are more pages/items available
     const hasMore = page * limit < totalRecipes;
-    
+
     res.status(200).json({
       recipes,
       currentPage: page,
