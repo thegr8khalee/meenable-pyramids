@@ -9,6 +9,7 @@ import { axiosInstance } from '../lib/axios.js';
 import whatsapp from '../images/whatsapp.png';
 // import Hero1 from '../images/Hero1.png';
 import { useAuthStore } from '../store/useAuthStore.js';
+import { useCheckOutStore } from '../store/useCheckoutStore.js';
 
 const CartPage = () => {
   const {
@@ -22,7 +23,10 @@ const CartPage = () => {
     clearCart,
   } = useCartStore();
 
-  const { isAuthReady } = useAuthStore();
+  const { isAuthReady, authUser } = useAuthStore();
+
+  const { processCheckout, loading } = useCheckOutStore();
+
   const navigate = useNavigate();
 
   const [detailedCartItems, setDetailedCartItems] = useState([]);
@@ -39,6 +43,8 @@ const CartPage = () => {
       });
     }
   }, [getCart, isAuthReady]);
+
+  //   console.log(cart);
 
   // Effect to fetch detailed product info for each item in the cart
   useEffect(() => {
@@ -116,7 +122,10 @@ const CartPage = () => {
             item: cartItem.item,
             itemType: 'Product',
             quantity: cartItem.quantity,
-            name: `Error loading product (ID: ${cartItem.item.substring(0, 6)}...)`,
+            name: `Error loading product (ID: ${cartItem.item.substring(
+              0,
+              6
+            )}...)`,
             imageUrl: 'https://placehold.co/100x100/E0E0E0/333333?text=Error',
             displayPrice: 0,
             error: true,
@@ -214,6 +223,45 @@ const CartPage = () => {
     )}`;
   };
 
+  const [isOpen, setIsOpen] = useState(false);
+  const [formData, setFormData] = useState({
+    userName: authUser?.username || '',
+    deliveryAddress: '',
+    phoneNumber: authUser?.phoneNumber || '',
+    note: '',
+    email: authUser?.email || '',
+    // cart: cart, // Assuming 'cart' is a state or prop from your cart store
+  });
+
+  const handleChange = (e) => {
+    setFormData({ ...formData, [e.target.name]: e.target.value });
+  };
+
+  const handleSubmit = (e) => {
+    e.preventDefault();
+
+    // Create a new, empty FormData object
+    const checkoutFormData = new FormData();
+
+    // Append all fields from the formData state object
+    checkoutFormData.append('username', formData.userName);
+    checkoutFormData.append('email', formData.email);
+    checkoutFormData.append('phoneNumber', formData.phoneNumber);
+    checkoutFormData.append('deliveryAddress', formData.deliveryAddress);
+    checkoutFormData.append('note', formData.note);
+
+    // 🔴 IMPORTANT: Convert the cart array to a JSON string before appending
+    checkoutFormData.append(
+      'cart',
+      JSON.stringify(useCartStore.getState().cart)
+    );
+
+    // Now, pass this complete FormData object to the checkout function
+    processCheckout(checkoutFormData);
+    // setIsOpen(false);
+    // console.log(checkoutFormData);
+  };
+
   if (isGettingCart) {
     return (
       <div className="">
@@ -240,27 +288,27 @@ const CartPage = () => {
   }
 
   return (
-    <div className="overflow-x-hidden">
+    <div className="overflow-x-hidden font-[inter]">
       <div className="relative">
         <img
           src={spiceherbs}
           alt=""
-          className="object-cover h-40 w-full"
+          className="object-cover h-20 sm:h-40 w-full"
         />
         <div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent">
-          <h1 className="absolute bottom-10 left-1/2 -translate-x-1/2 mt-20 w-full mb-2 text-3xl font-bold text-center text-base-100 font-[inter]">
+          <h1 className="absolute bottom-5 sm:bottom-10 left-1/2 -translate-x-1/2 mt-20 w-full mb-2 text-3xl font-bold text-center text-base-100 font-[inter]">
             Your Shopping Cart
           </h1>
         </div>
       </div>
       <div className="container mx-auto p-2 sm:p-6 lg:p-8 w-full">
-        <div className="flex flex-col lg:flex-row gap-8">
+        <div className="flex flex-col lg:flex-row gap-2">
           {/* Cart Items List */}
           <div className="flex-1 bg-base-100 p-2 rounded-none shadow-xl">
             <h2 className="text-2xl font-semibold mb-6">
               Items ({totalItemsInCart})
             </h2>
-            <div className="space-y-4">
+            <div className="space-y-4 max-h-[30vh] overflow-y-auto pr-1">
               {detailedCartItems.map((item) => (
                 <div
                   key={item._id}
@@ -308,7 +356,9 @@ const CartPage = () => {
                     <div className="space-x-2 flex items-center w-full justify-end">
                       <button
                         type="button"
-                        onClick={() => handleUpdateQuantity(item.item, item.quantity, -1)}
+                        onClick={() =>
+                          handleUpdateQuantity(item.item, item.quantity, -1)
+                        }
                         className="btn btn-circle btn-sm btn-outline btn-primary"
                         disabled={item.quantity <= 1}
                       >
@@ -320,7 +370,9 @@ const CartPage = () => {
                       </span>
                       <button
                         type="button"
-                        onClick={() => handleUpdateQuantity(item.item, item.quantity, 1)}
+                        onClick={() =>
+                          handleUpdateQuantity(item.item, item.quantity, 1)
+                        }
                         className="btn btn-circle btn-sm btn-outline btn-primary"
                       >
                         <Plus size={16} />
@@ -359,44 +411,153 @@ const CartPage = () => {
           </div>
 
           {/* Order Summary */}
-          <div className="lg:w-1/3 bg-base-100 p-6 rounded-lg shadow-xl">
-            <h2 className="text-2xl font-semibold mb-6">Order Summary</h2>
-            <div className="space-y-3">
-              <div className="flex justify-between text-lg">
-                <span>Subtotal ({totalItemsInCart} items)</span>
-                <span className="font-medium">
-                  ₦
-                  {Number(calculateOverallTotal()).toLocaleString('en-NG', {
-                    minimumFractionDigits: 2,
-                    maximumFractionDigits: 2,
-                  })}
-                </span>
+          {cart && cart.length > 0 ? (
+            <div className="lg:w-1/3 bg-base-100 p-6 rounded-none shadow-xl justify-between flex flex-col">
+              <div>
+                <h2 className="text-2xl font-semibold mb-6">Order Summary</h2>
+                <div className="space-y-2">
+                  <div className="flex justify-between text-lg">
+                    <span>Subtotal ({totalItemsInCart} items)</span>
+                    <span className="font-medium">
+                      ₦
+                      {Number(calculateOverallTotal()).toLocaleString('en-NG', {
+                        minimumFractionDigits: 2,
+                        maximumFractionDigits: 2,
+                      })}
+                    </span>
+                  </div>
+                  <div className="flex justify-between text-lg">
+                    <span>Delivery fee</span>
+                    <span className="font-medium">₦1,000</span>
+                  </div>
+                  {/* <div className="border-t border-base-200 my-4"></div> */}
+                </div>
               </div>
-              <div className="border-t border-base-200 my-4"></div>
-              <div className="flex justify-between text-xl font-bold text-red-500">
-                <span>Total</span>
-                <span>
-                  ₦
-                  {Number(calculateOverallTotal()).toLocaleString('en-NG', {
-                    minimumFractionDigits: 2,
-                    maximumFractionDigits: 2,
-                  })}
-                </span>
+              <div className="">
+                <div className="flex justify-between text-xl font-bold text-red-500">
+                  <span>Total</span>
+                  <span>
+                    ₦
+                    {Number(calculateOverallTotal() + 1000).toLocaleString(
+                      'en-NG',
+                      {
+                        minimumFractionDigits: 2,
+                        maximumFractionDigits: 2,
+                      }
+                    )}
+                  </span>
+                </div>
+                {/* Checkout Button */}
+                <button
+                  className="btn btn-primary border-0 shadow-none rounded-none text-white w-full"
+                  onClick={() => setIsOpen(true)}
+                >
+                  Checkout
+                </button>
+
+                {/* Modal */}
+                {isOpen && (
+                  <div className="modal modal-open">
+                    <div className="modal-box rounded-none">
+                      <h2 className="text-2xl font-semibold mb-4">
+                        Checkout Details
+                      </h2>
+                      <form onSubmit={handleSubmit} className="space-y-4">
+                        <div>
+                          <label className="block font-medium">Name</label>
+                          <input
+                            type="text"
+                            name="userName"
+                            className="input input-bordered w-full rounded-none"
+                            value={formData.userName}
+                            onChange={handleChange}
+                            required
+                          />
+                        </div>
+
+                        <div>
+                          <label className="block font-medium">
+                            Delivery Address
+                          </label>
+                          <textarea
+                            name="deliveryAddress"
+                            className="textarea textarea-bordered w-full rounded-none"
+                            value={formData.deliveryAddress}
+                            onChange={handleChange}
+                            required
+                          ></textarea>
+                        </div>
+
+                        <div>
+                          <label className="block font-medium">Email</label>
+                          <input
+                            type="email"
+                            name="email"
+                            className="input input-bordered w-full rounded-none"
+                            value={formData.email}
+                            onChange={handleChange}
+                            required
+                          />
+                        </div>
+
+                        <div>
+                          <label className="block font-medium">
+                            Phone Number
+                          </label>
+                          <input
+                            type="tel"
+                            name="phoneNumber"
+                            className="input input-bordered w-full rounded-none"
+                            value={formData.phoneNumber}
+                            onChange={handleChange}
+                            required
+                          />
+                        </div>
+
+                        <div>
+                          <label className="block font-medium">Note</label>
+                          <textarea
+                            name="note"
+                            className="textarea textarea-bordered w-full rounded-none"
+                            value={formData.note}
+                            onChange={handleChange}
+                          ></textarea>
+                        </div>
+
+                        <div className="flex justify-end space-x-3 mt-4">
+                          <button
+                            type="button"
+                            className="btn btn-ghost rounded-none"
+                            onClick={() => setIsOpen(false)}
+                          >
+                            Cancel
+                          </button>
+                          <button
+                            type="submit"
+                            className="btn btn-primary rounded-none shadow-none border-none text-white"
+                          >
+                            {loading ? (
+                              <Loader2 className="animate-spin" />
+                            ) : (
+                              'Proceed to Payment'
+                            )}
+                          </button>
+                        </div>
+                      </form>
+                    </div>
+                  </div>
+                )}
+                <a
+                  className="btn bg-green-500 text-white border-0 shadow-none w-full mt-2 rounded-none"
+                  href={whatsappCartHref(detailedCartItems)}
+                  disabled={isRemovingFromCart || !cart || cart.length === 0}
+                >
+                  <img src={whatsapp} alt="" className="size-8" /> Order On
+                  WhatsApp
+                </a>
               </div>
             </div>
-            <a
-              className="btn bg-green-500 text-white border-0 shadow-none w-full mt-8 rounded-none"
-              href={whatsappCartHref(detailedCartItems)}
-              disabled={isRemovingFromCart || !cart || cart.length === 0}
-            >
-              <img
-                src={whatsapp}
-                alt=""
-                className="size-8"
-              />{' '}
-              Order On WhatsApp
-            </a>
-          </div>
+          ) : null}
         </div>
       </div>
     </div>

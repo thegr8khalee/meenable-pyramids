@@ -25,6 +25,9 @@ import AdminAddRecipePage from './pages/AddRecipePage';
 import AdminEditRecipePage from './pages/EditRecipePage';
 import Recipes from './pages/Recipes';
 import RecipePage from './pages/RecipePage';
+import PaymentSuccess from './pages/PaymentSuccess';
+import PaymentError from './pages/PaymentError';
+import PaymentFailure from './pages/PaymentFailure';
 
 function App() {
   const { checkAuth, authUser, isAdmin, isAuthReady } = useAuthStore();
@@ -46,6 +49,9 @@ function App() {
           <Route path="/product/:productId" element={<ProductPage />} />
           <Route path="/recipe/:recipeId" element={<RecipePage />} />
           <Route path="/cart" element={<CartPage />} />
+          <Route path="/payment-success" element={<PaymentSuccess />} />
+          <Route path="/payment-error" element={<PaymentError />} />
+          <Route path="/payment-failure" element={<PaymentFailure />} />
           <Route
             path="/profile"
             element={authUser ? <ProfilePage /> : <LoginPage />}
@@ -73,7 +79,10 @@ function App() {
               element={<AdminEditProductPage />}
             />
             <Route path="/admin/recipe/new" element={<AdminAddRecipePage />} />
-            <Route path="/admin/recipe/edit/:recipeId" element={<AdminEditRecipePage />} />
+            <Route
+              path="/admin/recipe/edit/:recipeId"
+              element={<AdminEditRecipePage />}
+            />
           </Route>
         </Routes>
 

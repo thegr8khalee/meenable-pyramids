@@ -125,7 +125,7 @@ const ProfilePage = () => {
           My Profile
         </h1>
 
-        <div className="max-w-2xl mx-auto bg-base-100 p-6 rounded-lg shadow-xl">
+        <div className="max-w-2xl mx-auto bg-base-100 p-6 rounded-none shadow-xl">
           {/* Error and Success messages are now handled by react-hot-toast directly from store actions */}
           {/* {profileUpdateError && (
             <div role="alert" className="alert alert-error mb-4">

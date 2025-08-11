@@ -154,3 +154,17 @@ export const getRecipes = async (req, res) => {
     res.status(500).json({ message: 'Internal Server Error' });
   }
 };
+
+export const getRecipesCount = async (req, res) => {
+  try {
+    // Get the total count of all products (no filters applied)
+    const totalRecipes = await Recipe.countDocuments({});
+
+    res.status(200).json({
+      totalRecipes, // Returns the total count of products
+    });
+  } catch (error) {
+    console.error('Error in getProducts controller: ', error.message);
+    res.status(500).json({ message: 'Internal Server Error' });
+  }
+};

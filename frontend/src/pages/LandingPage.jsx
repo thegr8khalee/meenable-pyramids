@@ -15,6 +15,7 @@ import { useAdminStore } from '../store/useAdminStore';
 import { useProductsStore } from '../store/useProductsStore';
 import { ShoppingCart, Star } from 'lucide-react';
 import { useCartStore } from '../store/UseCartStore';
+import { useAuthStore } from '../store/useAuthStore';
 
 const LandingPage = () => {
   const navigate = useNavigate();
@@ -22,6 +23,7 @@ const LandingPage = () => {
   const { recipes, getRecipes, isGettingRecipes } = useAdminStore();
   const { products, getProducts, isGettingProducts } = useProductsStore();
   const { addRecipeToCart, isAddingToCart, addToCart } = useCartStore();
+  const { isAdmin } = useAuthStore();
 
   useEffect(() => {
     getRecipes();
@@ -573,7 +575,7 @@ const LandingPage = () => {
                         />
                       ))}
                     </div>
-                    <h1 className='text-xs'>({product.averageRating})</h1>
+                    <h1 className="text-xs">({product.averageRating})</h1>
                   </div>
                   <div className="w-full justify-between flex items-center mt-1">
                     {product.isPromo &&
@@ -608,12 +610,13 @@ const LandingPage = () => {
                         })}
                       </span>
                     )}
-                    <button
+                    {!isAdmin ? <button
                       className="btn btn-primary btn-sm text-white rounded-none border-none shadow-none"
                       onClick={() => handleAddToCart(product._id, 1)}
                     >
                       <ShoppingCart />
-                    </button>
+                    </button> : null}
+                    
                   </div>
                 </div>
               </div>
@@ -715,7 +718,7 @@ const LandingPage = () => {
                   <img
                     src={rod[0].image?.url}
                     alt={rod[0].name}
-                    className="h-full w-full object-cover"
+                    className="h-full w-full object-cover rounded-2xl"
                     onError={(e) => {
                       e.target.src = 'path-to-fallback-image.jpg';
                     }}
@@ -753,7 +756,7 @@ const LandingPage = () => {
                   >
                     View Recipe
                   </button>
-                  <button
+                  {!isAdmin ? <button
                     className="btn-lg shadow-none rounded-none flex-1 btn btn-primary text-white"
                     onClick={() => handleAddRecipeToCart(rod[0])}
                     disabled={isAddingToCart}
@@ -763,7 +766,8 @@ const LandingPage = () => {
                     ) : (
                       'Add to Cart'
                     )}
-                  </button>
+                  </button> : null}
+                  
                 </div>
               </div>
             ) : (
@@ -859,11 +863,11 @@ const LandingPage = () => {
             </div>
 
             <div className="flex">
-              <div className="w-[500px] lg:w-[700px]">
+              <div className="w-[500px] lg:w-[700px] m-2">
                 <img
                   src={rod[0].image?.url || '/images/recipe-fallback.jpg'}
                   alt={rod[0].name || 'Recipe image'}
-                  className="w-full"
+                  className="w-full rounded-2xl"
                   onError={(e) => {
                     e.target.src = '/images/recipe-fallback.jpg';
                   }}
@@ -895,17 +899,17 @@ const LandingPage = () => {
                   >
                     View Recipe
                   </button>
-                  <button
+                  {!isAdmin ? <button
                     className="btn-lg shadow-none rounded-none flex-1 btn btn-primary text-white"
-                    onClick={() => rod[0] && handleAddRecipeToCart(rod[0])}
-                    disabled={isAddingToCart || !rod[0]}
+                    onClick={() => handleAddRecipeToCart(rod[0])}
+                    disabled={isAddingToCart}
                   >
                     {isAddingToCart ? (
                       <span className="loading loading-spinner"></span>
                     ) : (
                       'Add to Cart'
                     )}
-                  </button>
+                  </button> : null}
                 </div>
               </div>
             </div>

@@ -9,6 +9,7 @@ export const useProductsStore = create((set, get) => ({
   hasMoreProducts: true, // Flag to indicate if more products can be loaded
   currentFilters: {}, // Stores the filters currently applied to the fetched products
   productsCount: null,
+  recipesCount: null,
 
   getProductsCount: async () => {
     set({ isGettingProducts: true });
@@ -20,6 +21,19 @@ export const useProductsStore = create((set, get) => ({
       console.error('Error fetching products count:', error);
     } finally {
       set({ isGettingProducts: false });
+    }
+  },
+
+   getRecipesCount: async () => {
+    // set({ isGettingProducts: true });
+
+    try {
+      const res = await axiosInstance.get('/products/recipe/count');
+      set({ recipesCount: res.data.totalRecipes });
+    } catch (error) {
+      console.error('Error fetching products count:', error);
+    } finally {
+      // set({ isGettingProducts: false });
     }
   },
 

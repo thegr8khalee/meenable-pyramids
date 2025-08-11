@@ -6,21 +6,22 @@ import { useAdminStore } from '../../store/useAdminStore';
 import { Loader2 } from 'lucide-react';
 
 const AdminDashboardContent = ({ setActiveSection }) => {
-  const { isGettingProducts, productsCount, getProductsCount } =
+  const { isGettingProducts, productsCount, getProductsCount, recipesCount, getRecipesCount } =
     useProductsStore();
-  const { getAllUsers, usersCount, getRecipes, recipes } = useAdminStore();
+  const { getAllUsers, usersCount, getRecipes } = useAdminStore();
 
   useEffect(() => {
     // Fetch all necessary data on component mount
     getProductsCount();
     getAllUsers();
     getRecipes();
-  }, [getProductsCount, getAllUsers, getRecipes]);
+    getRecipesCount();
+  }, [getProductsCount, getAllUsers, getRecipes, getRecipesCount]);
 
   const stats = [
     { label: 'Total Products', value: productsCount, path: 'products' },
     { label: 'Total Users', value: usersCount, path: 'users' },
-    { label: 'Total Recipes', value: recipes.length, path: 'recipe' },
+    { label: 'Total Recipes', value: recipesCount, path: 'recipe' },
   ];
 
   const handleNavigationClick = (sectionId) => {
