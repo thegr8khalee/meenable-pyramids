@@ -93,7 +93,7 @@ export const checkOut = async (req, res) => {
         reference,
         callback_url: `${process.env.BASE_URL}/api/checkout/callback`,
         metadata: {
-          cancel_action: 'http://localhost:5173/cart', // Your homepage URL
+          cancel_action: `${process.env.CART_URL}`, // Your homepage URL
         },
       },
       {
