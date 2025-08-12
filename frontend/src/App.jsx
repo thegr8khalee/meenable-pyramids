@@ -35,7 +35,7 @@ import Privacy from './pages/Privacy';
 import CookiePolicy from './pages/CookiePolicy';
 
 function App() {
-  const { checkAuth, authUser, isAdmin, isAuthReady } = useAuthStore();
+  const { checkAuth, authUser, isAuthReady } = useAuthStore();
 
   useEffect(() => {
     checkAuth();

@@ -1,3 +1,4 @@
+/* eslint-disable no-unused-vars */
 // src/pages/RecipePage.jsx
 import { motion, AnimatePresence } from 'framer-motion';
 import React, { useState, useEffect } from 'react';

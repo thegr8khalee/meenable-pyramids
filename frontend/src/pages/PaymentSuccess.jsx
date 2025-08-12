@@ -40,7 +40,7 @@ const PaymentSuccess = () => {
   return (
     <div className="font-[inter]">
       <div className="container mx-auto p-4 sm:p-6 lg:p-8 items-center justify-center">
-        <div className="max-w-5xl mx-auto bg-base-200 p-6 rounded-none shadow-xl items-center justify-center flex flex-col">
+        <div className="max-w-5xl mx-auto bg-base-200 p-6 rounded-none shadow-xl items-center text-center justify-center flex flex-col">
           <CircleCheck className="size-20 stroke-green-500 mb-4" />
           <h1 className="font-medium text-2xl">Thank You!</h1>
           <h1 className="font-medium text-2xl">

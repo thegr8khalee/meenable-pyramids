@@ -1,3 +1,4 @@
+/* eslint-disable no-unused-vars */
 // src/pages/ProductPage.jsx
 import React, { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
