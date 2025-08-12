@@ -3,70 +3,82 @@ import React from 'react';
 import { useAuthStore } from '../../store/useAuthStore';
 import { X } from 'lucide-react';
 
-const AdminSidebar = ({ activeSection, setActiveSection, isSidebarOpen, closeSidebar }) => {
-    const logout = useAuthStore((state) => state.logout);
+const AdminSidebar = ({
+  activeSection,
+  setActiveSection,
+  isSidebarOpen,
+  closeSidebar,
+}) => {
+  const logout = useAuthStore((state) => state.logout);
 
-    const navItems = [
-        { id: 'dashboard', name: 'Dashboard Overview' },
-        { id: 'products', name: 'Manage Products' },
-        { id: 'recipe', name: 'Manage Recipes' },
-        { id: 'users', name: 'Users' },
-    ];
+  const navItems = [
+    { id: 'dashboard', name: 'Dashboard Overview' },
 
-    // Function to handle navigation item click and close sidebar on mobile
-    const handleNavigationClick = (sectionId) => {
-        setActiveSection(sectionId);
-        // Corrected: Call the prop directly to close the sidebar.
-        // It's a function from the store that doesn't take arguments.
-        closeSidebar();
-    };
+    { id: 'newOrders', name: 'New Orders' },
+    { id: 'orders', name: 'Orders' },
+    { id: 'products', name: 'Manage Products' },
+    { id: 'recipe', name: 'Manage Recipes' },
+    { id: 'users', name: 'Users' },
+  ];
 
-    return (
-        <div
-            className={`
+  // Function to handle navigation item click and close sidebar on mobile
+  const handleNavigationClick = (sectionId) => {
+    setActiveSection(sectionId);
+    // Corrected: Call the prop directly to close the sidebar.
+    // It's a function from the store that doesn't take arguments.
+    closeSidebar();
+  };
+
+  return (
+    <div
+      className={`
                 fixed inset-y-0 left-0 z-50
                 w-80 bg-base-300 p-6 shadow-lg flex flex-col justify-between
                 transform transition-transform duration-300 ease-in-out
                 lg:relative lg:translate-x-0 lg:rounded-r-lg lg:shadow-lg
                 ${isSidebarOpen ? 'translate-x-0' : '-translate-x-full'}
             `}
+    >
+      {/* NEW: Close button for mobile */}
+      <div className="lg:hidden absolute top-4 right-4">
+        <button
+          className="btn btn-ghost btn-circle"
+          onClick={closeSidebar} // Corrected: Call the prop directly
+          aria-label="Close sidebar"
         >
-            {/* NEW: Close button for mobile */}
-            <div className="lg:hidden absolute top-4 right-4">
-                <button
-                    className="btn btn-ghost btn-circle"
-                    onClick={closeSidebar} // Corrected: Call the prop directly
-                    aria-label="Close sidebar"
-                >
-                    <X size={24} />
-                </button>
-            </div>
+          <X size={24} />
+        </button>
+      </div>
 
-            <div>
-                <h2 className="text-2xl font-bold mb-8 mt-4 lg:mt-0 font-['inter']">Admin Panel</h2>
-                <ul className="menu rounded-box text-xl">
-                    {navItems.map((item) => (
-                        <li key={item.id}>
-                            <a
-                                className={activeSection === item.id ? 'active font-semibold' : ''}
-                                onClick={() => handleNavigationClick(item.id)}
-                            >
-                                {item.name}
-                            </a>
-                        </li>
-                    ))}
-                </ul>
-            </div>
-            <div className="mt-8">
-                <button
-                    onClick={logout}
-                    className="btn btn-error btn-block rounded-none shadow-md"
-                >
-                    Logout
-                </button>
-            </div>
-        </div>
-    );
+      <div>
+        <h2 className="text-2xl font-bold mb-8 mt-4 lg:mt-0 font-['inter']">
+          Admin Panel
+        </h2>
+        <ul className="menu rounded-box text-xl">
+          {navItems.map((item) => (
+            <li key={item.id}>
+              <a
+                className={
+                  activeSection === item.id ? 'active font-semibold' : ''
+                }
+                onClick={() => handleNavigationClick(item.id)}
+              >
+                {item.name}
+              </a>
+            </li>
+          ))}
+        </ul>
+      </div>
+      <div className="mt-8">
+        <button
+          onClick={logout}
+          className="btn btn-error btn-block rounded-none shadow-md"
+        >
+          Logout
+        </button>
+      </div>
+    </div>
+  );
 };
 
 export default AdminSidebar;

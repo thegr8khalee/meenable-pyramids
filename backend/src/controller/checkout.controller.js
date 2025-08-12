@@ -74,7 +74,7 @@ export const checkOut = async (req, res) => {
       deliveryAddress,
       note,
       products: orderProducts, // Use the newly created products array
-      totalPrice,
+      totalPrice: totalPrice - 1000,
       orderStatus: 'pending',
     });
 
@@ -155,7 +155,7 @@ export const callback = async (req, res) => {
       await order.save();
       console.log(`Order ${order._id} successfully updated to 'paid'.`);
       // Redirect to a success page with a message
-      console.log(order)
+      console.log(order);
       axios
         .post(`${process.env.BASE_URL}/api/contact/order`, order)
         .catch((err) => console.error('Notification failed:', err.response));
@@ -247,16 +247,21 @@ export const getOrderbyId = async (req, res) => {
   }
 };
 
-export const getMyOrders = async (req, res) => {};
+// export const getMyOrders = async (req, res) => {};
 
 export const getAllOrders = async (req, res) => {
-  const page = parseInt(req.query.page) || 1;
-  const limit = parseInt(req.query.limit) || 20;
-  const skip = (page - 1) * limit;
-
   try {
-    const totalOrders = await Order.countDocuments();
+    // Parse pagination parameters from the query string
+    const page = parseInt(req.query.page) || 1;
+    const limit = parseInt(req.query.limit) || 20; // Default limit of 20
+    const skip = (page - 1) * limit;
 
+    // Get the total count of all orders in the database
+    const totalOrders = await Order.countDocuments({});
+
+    const newOrders = await Order.find({ seen: false }).sort({ createdAt: -1 });
+
+    // Fetch the orders with pagination
     const orders = await Order.find({})
       .sort({ createdAt: -1 }) // Sort by newest first
       .skip(skip)
@@ -264,18 +269,177 @@ export const getAllOrders = async (req, res) => {
       .populate({
         path: 'products.productId',
         model: 'Product',
-        select: 'name price images category',
+        select: 'name price images category', // Select specific product fields to populate
       });
 
-    res.status(200).json({
-      page,
-      limit,
-      totalPages: Math.ceil(totalOrders / limit),
+    // Check if there are more pages available
+    const hasMore = page * limit < totalOrders;
+
+    return res.status(200).json({
+      success: true,
+      orders,
+      newOrders,
+      currentPage: page,
       totalOrders,
-      data: orders,
+      hasMore,
     });
   } catch (error) {
     console.error('Error fetching all orders:', error);
-    res.status(500).json({ message: 'Server error' });
+    return res.status(500).json({
+      success: false,
+      message: 'Server Error. Could not retrieve orders.',
+    });
+  }
+};
+
+export const markOrderSeen = async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    // Find the order by ID and update the 'seen' field to true.
+    // The { new: true } option returns the updated document.
+    const updatedOrder = await Order.findByIdAndUpdate(
+      id,
+      { seen: true },
+      { new: true, runValidators: true }
+    ).populate({
+      path: 'products.productId',
+      model: 'Product',
+      select: 'name price images category',
+    });
+
+    // If no order is found with the provided ID, return a 404 error
+    if (!updatedOrder) {
+      return res.status(404).json({
+        success: false,
+        message: 'Order not found.',
+      });
+    }
+
+    // Return the updated order with a success message
+    return res.status(200).json({
+      success: true,
+      message: 'Order marked as seen.',
+      data: updatedOrder,
+    });
+  } catch (error) {
+    console.error('Error marking order as seen:', error);
+
+    // Handle Mongoose CastError for an invalid ObjectId
+    if (error.name === 'CastError') {
+      return res.status(400).json({
+        success: false,
+        message: 'Invalid order ID format.',
+      });
+    }
+
+    // Handle other server errors
+    return res.status(500).json({
+      success: false,
+      message: 'Server Error. Could not update order status.',
+    });
+  }
+};
+
+export const deleteOrder = async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    // Attempt to find and delete the order by its ID
+    const deletedOrder = await Order.findByIdAndDelete(id);
+
+    // If no order is found with the provided ID, return a 404 error
+    if (!deletedOrder) {
+      return res.status(404).json({
+        success: false,
+        message: 'Order not found.',
+      });
+    }
+
+    // Return a success message and the deleted order's data
+    return res.status(200).json({
+      success: true,
+      message: 'Order deleted successfully.',
+      data: deletedOrder,
+    });
+  } catch (error) {
+    console.error('Error deleting order:', error);
+
+    // Handle Mongoose CastError for an invalid ObjectId format
+    if (error.name === 'CastError') {
+      return res.status(400).json({
+        success: false,
+        message: 'Invalid order ID format.',
+      });
+    }
+
+    // Handle other server errors
+    return res.status(500).json({
+      success: false,
+      message: 'Server Error. Could not delete order.',
+    });
+  }
+};
+
+export const getSalesSummary = async (req, res) => {
+  try {
+    const summary = await Order.aggregate([
+      // Stage 1: Filter for only 'paid' orders
+      { $match: { orderStatus: 'paid' } },
+
+      // Stage 2: Deconstruct the 'products' array
+      { $unwind: '$products' },
+
+      // Stage 3: Filter out any bad data that doesn't have a quantity
+      { $match: { 'products.quantity': { $exists: true, $type: 'number' } } },
+
+      // 🟢 FIXED: Stage 4 - Group by original order ID to get individual order totals
+      {
+        $group: {
+          _id: '$_id',
+          // Get the original totalPrice from the first document in the group
+          totalPrice: { $first: '$totalPrice' },
+          totalProducts: { $sum: '$products.quantity' },
+        },
+      },
+
+      // 🟢 FIXED: Stage 5 - Create a grand total from the results of the previous group
+      {
+        $group: {
+          _id: null,
+          totalSales: { $sum: '$totalPrice' }, // Correctly sum the non-duplicated totalPrices
+          totalPaidOrders: { $sum: 1 }, // Count the number of orders
+          totalProducts: { $sum: '$totalProducts' },
+        },
+      },
+
+      // Stage 6 (Optional): Remove the _id field and project the final values
+      {
+        $project: {
+          _id: 0,
+          totalSales: 1,
+          totalPaidOrders: 1,
+          totalProducts: 1,
+        },
+      },
+    ]);
+
+    if (summary.length === 0) {
+      return res.status(200).json({
+        success: true,
+        data: { totalSales: 0, totalPaidOrders: 0, totalProducts: 0 },
+      });
+    }
+
+    return res.status(200).json({
+      success: true,
+      data: summary[0],
+    });
+  } catch (error) {
+    console.error('Error getting sales summary:', error);
+    return res.status(500).json({
+      success: false,
+      message: 'Server Error. Could not get sales summary.',
+    });
   }
 };

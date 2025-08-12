@@ -73,6 +73,16 @@ const orderSchema = new mongoose.Schema(
       default: 'pending',
       required: true,
     },
+    seen: {
+      type: Boolean,
+      default: false,
+      required: true,
+    },
+    createdAt: {
+      type: Date,
+      default: Date.now,
+      index: true, // Add an index here
+    },
   },
   {
     timestamps: true, // Adds createdAt and updatedAt timestamps

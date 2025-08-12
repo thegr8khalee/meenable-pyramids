@@ -28,6 +28,192 @@ export const useAdminStore = create((set, get) => ({
   currentPage: 0,
   currentPageUsers: 0,
 
+  ordersData: {
+    allOrders: [],
+    newOrders: [],
+    totalOrders: null,
+    currentPage: 1,
+    totalPages: 1,
+    hasMore: true,
+  },
+
+  salesSummary: {
+    totalSales: 0,
+    totalPaidOrders: 0,
+    totalProducts: 0,
+  },
+
+  isGettingSalesSummary: false,
+
+  // States for API request status remain at the top level
+  isGettingOrders: false,
+  error: null,
+
+  isMarkingOrderSeen: false,
+  isDeletingOrder: false,
+
+  getSalesSummary: async () => {
+    set({ isGettingSalesSummary: true, error: null });
+    const { isAdmin } = useAuthStore.getState();
+    if (!isAdmin) {
+      set({ isGettingSalesSummary: false });
+      return;
+    }
+
+    try {
+      const res = await axiosInstance.get('/checkout/sales-summary');
+      set({ salesSummary: res.data.data });
+    } catch (error) {
+      console.error('Error fetching sales summary:', error);
+      const errorMessage =
+        error.response?.data?.message || 'Failed to fetch sales summary.';
+      set({ error: errorMessage });
+      toast.error(errorMessage);
+    } finally {
+      set({ isGettingSalesSummary: false });
+    }
+  },
+
+  deleteOrder: async (orderId) => {
+    set({ isDeletingOrder: true, error: null });
+
+    const { isAdmin } = useAuthStore.getState();
+    if (!isAdmin) {
+      toast.error('You do not have permission to delete orders.');
+      set({ isDeletingOrder: false });
+      return;
+    }
+
+    try {
+      // Send a DELETE request to the backend to remove the order
+      await axiosInstance.delete(`/checkout/del/${orderId}`);
+
+      // Update the allOrders array by filtering out the deleted order
+      set((state) => ({
+        ordersData: {
+          ...state.ordersData,
+          allOrders: state.ordersData.allOrders.filter(
+            (order) => order._id !== orderId
+          ),
+          // Decrement totalOrders count to keep it accurate
+          totalOrders: state.ordersData.totalOrders - 1,
+        },
+      }));
+      toast.success('Order deleted successfully!');
+    } catch (error) {
+      console.error('Error deleting order:', error);
+      const errorMessage =
+        error.response?.data?.message || 'Failed to delete order.';
+      set({ error: errorMessage });
+      toast.error(errorMessage);
+    } finally {
+      set({ isDeletingOrder: false });
+    }
+  },
+
+  // Async function to fetch all orders from the backend with pagination
+  getAllOrders: async (page = 1, limit = 20, append = true) => {
+    // 1. Prevent redundant fetches: if already loading, or no more orders to load
+    const { isGettingOrders, ordersData } = get();
+    if (isGettingOrders || (!ordersData.hasMore && append)) {
+      return;
+    }
+
+    set({ isGettingOrders: true, error: null });
+
+    // 2. Security check: Only proceed if the user is an admin
+    const { isAdmin } = useAuthStore.getState();
+    if (!isAdmin) {
+      toast.error('You do not have permission to view orders.');
+      set({ isGettingOrders: false });
+      return;
+    }
+
+    try {
+      // 3. Make the API call with pagination query parameters
+      const queryParams = new URLSearchParams({
+        page: page,
+        limit: limit,
+      }).toString();
+
+      const res = await axiosInstance.get(`/checkout/get/all?${queryParams}`);
+
+      const { orders, newOrders, hasMore, totalOrders, currentPage } = res.data;
+
+      // 5. Update the store state with the fetched data
+      set((state) => ({
+        ordersData: {
+          // Append new paginated orders or replace the list if not appending
+          allOrders: append
+            ? [...state.ordersData.allOrders, ...orders]
+            : orders,
+          // Update the separate list of new orders
+          newOrders: newOrders,
+          totalOrders: totalOrders,
+          totalPages: Math.ceil(totalOrders / limit),
+          currentPage: currentPage,
+          hasMore: hasMore,
+        },
+      }));
+    } catch (error) {
+      console.error('Error fetching orders:', error);
+      const errorMessage =
+        error.response?.data?.message || 'Failed to fetch orders.';
+
+      set({
+        error: errorMessage,
+        ordersData: {
+          ...get().ordersData,
+          hasMore: false, // Stop further loading on error
+        },
+      });
+      toast.error(errorMessage);
+    } finally {
+      // 5. Reset the loading state
+      set({ isGettingOrders: false });
+    }
+  },
+
+  markOrderSeen: async (orderId) => {
+    set({ isMarkingOrderSeen: true, error: null });
+
+    const { isAdmin } = useAuthStore.getState();
+    if (!isAdmin) {
+      toast.error('You do not have permission to perform this action.');
+      set({ isMarkingOrderSeen: false });
+      return;
+    }
+
+    try {
+      // Send a PUT request to the backend to update the order
+      const res = await axiosInstance.put(`/checkout/mark/${orderId}`);
+      const updatedOrder = res.data.data;
+
+      // Update the allOrders array in the state
+      set((state) => ({
+        ordersData: {
+          ...state.ordersData,
+          allOrders: state.ordersData.allOrders.map((order) =>
+            order._id === updatedOrder._id ? updatedOrder : order
+          ),
+          newOrders: state.ordersData.newOrders.map((order) =>
+            order._id === updatedOrder._id ? updatedOrder : order
+          ),
+        },
+      }));
+
+      toast.success('Order marked as seen!');
+    } catch (error) {
+      console.error('Error marking order as seen:', error);
+      const errorMessage =
+        error.response?.data?.message || 'Failed to mark order as seen.';
+      set({ error: errorMessage });
+      toast.error(errorMessage);
+    } finally {
+      set({ isMarkingOrderSeen: false });
+    }
+  },
+
   // Action to toggle sidebar visibility
   toggleSidebar: () =>
     set((state) => ({ isSidebarOpen: !state.isSidebarOpen })),

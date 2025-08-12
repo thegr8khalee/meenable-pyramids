@@ -6,9 +6,23 @@ import { useAdminStore } from '../../store/useAdminStore';
 import { Loader2 } from 'lucide-react';
 
 const AdminDashboardContent = ({ setActiveSection }) => {
-  const { isGettingProducts, productsCount, getProductsCount, recipesCount, getRecipesCount } =
-    useProductsStore();
-  const { getAllUsers, usersCount, getRecipes } = useAdminStore();
+  const {
+    isGettingProducts,
+    productsCount,
+    getProductsCount,
+    recipesCount,
+    getRecipesCount,
+  } = useProductsStore();
+  const {
+    getAllUsers,
+    usersCount,
+    getRecipes,
+    getAllOrders,
+    ordersData,
+    salesSummary,
+    getSalesSummary,
+    isGettingSalesSummary,
+  } = useAdminStore();
 
   useEffect(() => {
     // Fetch all necessary data on component mount
@@ -16,12 +30,47 @@ const AdminDashboardContent = ({ setActiveSection }) => {
     getAllUsers();
     getRecipes();
     getRecipesCount();
-  }, [getProductsCount, getAllUsers, getRecipes, getRecipesCount]);
+    if (ordersData.allOrders.length === 0) {
+      getAllOrders();
+    }
+    getSalesSummary();
+  }, [
+    getProductsCount,
+    getAllUsers,
+    getRecipes,
+    getRecipesCount,
+    getAllOrders,
+    ordersData,
+    getSalesSummary,
+  ]);
+
+  console.log(ordersData)
 
   const stats = [
+    {
+      label: 'Total Sales ₦',
+      value: isGettingSalesSummary
+        ? 'Loading...'
+        : `₦${salesSummary.totalSales.toFixed(2)}`,
+      path: 'orders',
+    },
+    {
+      label: 'Unit Sales',
+      // Use optional chaining to safely access the array and a fallback of 0
+      value: salesSummary.totalProducts,
+      path: 'orders',
+    },
+    {
+      label: 'New Orders',
+      value: ordersData?.newOrders.length,
+      path: 'newOrders',
+    },
+
+    { label: 'Total Orders', value: ordersData?.totalOrders, path: 'orders' },
     { label: 'Total Products', value: productsCount, path: 'products' },
-    { label: 'Total Users', value: usersCount, path: 'users' },
+
     { label: 'Total Recipes', value: recipesCount, path: 'recipe' },
+    { label: 'Total Users', value: usersCount, path: 'users' },
   ];
 
   const handleNavigationClick = (sectionId) => {
@@ -64,12 +113,14 @@ const AdminDashboardContent = ({ setActiveSection }) => {
             </div>
             <div className="h-full flex items-center">
               {/* Corrected onClick handler: wrapped in an arrow function */}
-              <button
-                className="btn btn-outline btn-primary w-full rounded-none"
-                onClick={() => handleNavigationClick(stat.path)}
-              >
-                View
-              </button>
+              {stat.label !== 'Total Sales ₦' && stat.label !== 'Unit Sales' ? (
+                <button
+                  className="btn btn-outline btn-primary w-full rounded-none"
+                  onClick={() => handleNavigationClick(stat.path)}
+                >
+                  View
+                </button>
+              ) : null}
             </div>
           </div>
         ))}

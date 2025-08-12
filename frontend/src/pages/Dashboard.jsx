@@ -8,6 +8,8 @@ import { Menu } from 'lucide-react';
 import { useAdminStore } from '../store/useAdminStore';
 import RecipeManagement from '../components/admin/RecipeManagement';
 import Users from '../components/admin/Users';
+import Orders from '../components/admin/Orders';
+import NewOrders from '../components/admin/NewOrders';
 
 const AdminDashboard = () => {
   const { authUser } = useAuthStore();
@@ -33,13 +35,17 @@ const AdminDashboard = () => {
         return <RecipeManagement />;
       case 'users':
         return <Users />;
+    case 'orders':
+        return <Orders />;
+    case 'newOrders':
+        return <NewOrders />;
       default:
         return <AdminDashboardContent setActiveSection={setActiveSection} />;
     }
   };
 
   return (
-    <div className="flex min-h-screen bg-base-300 rounded-none overflow-x-hidden">
+    <div className="flex max-h-[90vh] bg-base-300 rounded-none overflow-x-hidden">
       {isSidebarOpen && (
         <div
           className="fixed inset-0 bg-black opacity-20 z-40 lg:hidden"
@@ -55,7 +61,7 @@ const AdminDashboard = () => {
         closeSidebar={closeSidebar}
       />
 
-      <div className="w-screen pt-10 flex-1 p-4 lg:p-8 rounded-none overflow-x-hidden">
+      <div className="w-screen flex-1 p-4 lg:p-8 rounded-none overflow-x-hidden">
         <h1 className="text-3xl lg:text-4xl font-bold mb-4 lg:mb-8 mt-12 lg:mt-0 font-['inter']">
           Welcome, {authUser.username || authUser.email}!
         </h1>
