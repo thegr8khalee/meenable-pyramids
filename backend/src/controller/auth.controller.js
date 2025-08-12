@@ -414,7 +414,7 @@ export const forgotPassword = async (req, res) => {
         <p>This link is valid for 1 hour. After that, you will need to request a new one.</p>
         <p>If you did not request this, please ignore this email and your password will remain unchanged.</p>
         <p>Thank you,</p>
-        <p>EM Furniture and Interior Team</p>
+        <p>Meenable Pyramids Team</p>
       `,
     };
 

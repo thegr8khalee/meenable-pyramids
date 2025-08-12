@@ -51,7 +51,9 @@ const SignupPage = () => {
           <form onSubmit={handleSubmit}>
             <div className="form-control mb-4">
               <label className="label">
-                <span className="label-text text-lg font-medium font-[inter]">Name</span>
+                <span className="label-text text-lg font-medium font-[inter]">
+                  Name
+                </span>
               </label>
               <input
                 type="name"
@@ -66,7 +68,9 @@ const SignupPage = () => {
               />
             </div>
             <label className="label">
-              <span className="label-text text-lg font-medium font-[inter]">Email</span>
+              <span className="label-text text-lg font-medium font-[inter]">
+                Email
+              </span>
             </label>
             <div className="form-control mb-4">
               <label className="input validator w-full rounded-none">
@@ -144,7 +148,9 @@ const SignupPage = () => {
               <p className="validator-hint">Must be at least 10 digits</p>
             </div>
             <label className="label">
-              <span className="label-text text-lg font-medium font-[inter]">Password</span>
+              <span className="label-text text-lg font-medium font-[inter]">
+                Password
+              </span>
             </label>
             <div className="form-control mb-6">
               <label className="input validator w-full rounded-none">
@@ -209,6 +215,12 @@ const SignupPage = () => {
                   <span className="pl-2">
                     <a href="/privacy" className="text-info">
                       Privacy Policy
+                    </a>
+                  </span>{' '}
+                  and
+                  <span className="pl-2">
+                    <a href="/cookie-policy" className="text-info">
+                    Cookie Policy
                     </a>
                   </span>
                 </p>

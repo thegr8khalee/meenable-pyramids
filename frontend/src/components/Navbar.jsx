@@ -133,7 +133,9 @@ const Navbar = () => {
           </div>
           <div className="navbar-center">
             <Link to="/" onClick={closeDrawer}>
-              <h1 className="text-lg font-[sarina]">Meenable Pyramids</h1>
+              <h1 className="text-lg font-[sarina] text-primary">
+                Meenable Pyramids
+              </h1>
             </Link>
           </div>
           <div className="navbar-end">
@@ -235,13 +237,9 @@ const Navbar = () => {
       <div className="hidden lg:flex navbar backdrop-blur-lg bg-base-100/80 shadow-sm z-100">
         <div className="navbar-start">
           <Link to="/">
-            <img
-              src={
-                'https://res.cloudinary.com/dqe64m85c/image/upload/v1753784164/logoLightMode_g6xdr7.png'
-              }
-              alt="Logo"
-              className="h-12"
-            />
+            <h1 className="text-lg font-[sarina] text-primary">
+              Meenable Pyramids
+            </h1>
           </Link>
         </div>
         <div className="navbar-center space-x-6">

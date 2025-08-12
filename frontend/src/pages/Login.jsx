@@ -69,7 +69,7 @@ const LoginPage = () => {
 
   // Render the login form or forgot password form
   return (
-    <div className="p-4 flex justify-center items-center h-screen bg-base-300">
+    <div className="p-4 flex justify-center items-center h-screen bg-base-300 font-[inter]">
       <div className="card w-md bg-base-100 shadow-xl rounded-none">
         <div className="card-body p-8">
           <h2 className="card-title text-center text-3xl font-bold mb-6 font-[inter]">
@@ -220,7 +220,7 @@ const LoginPage = () => {
                 <span className="label-text text-lg font-medium">Email</span>
               </label>
               <div className="form-control mb-4">
-                <label className="input validator w-full rounded-full">
+                <label className="input validator w-full rounded-none">
                   <svg
                     className="h-[1em] opacity-50"
                     xmlns="http://www.w3.org/2000/svg"
@@ -251,7 +251,7 @@ const LoginPage = () => {
               <div className="form-control">
                 <button
                   type="submit"
-                  className="btn btn-primary text-white w-full border-0 font-semibold py-3 rounded-full shadow-md hover:shadow-lg transition duration-200 text-sm font-['poppins']"
+                  className="btn btn-primary text-white w-full border-0 font-semibold py-3 rounded-none shadow-md hover:shadow-lg transition duration-200 text-sm font-['poppins']"
                   disabled={isRequestingReset}
                 >
                   {isRequestingReset ? (

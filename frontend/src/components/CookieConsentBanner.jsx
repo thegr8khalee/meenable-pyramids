@@ -51,6 +51,12 @@ const CookieConsentBanner = () => {
             className="underline font-medium hover:text-primary"
           >
             Privacy Policy
+          </a> <span> And </span>
+          <a
+            href="/cookie-policy"
+            className="underline font-medium hover:text-primary"
+          >
+            Cookie Policy
           </a>
           .
         </p>
