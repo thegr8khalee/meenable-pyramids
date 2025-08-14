@@ -255,7 +255,7 @@ const Navbar = () => {
           {/* <Link to="/showroom" className=" border-0 shadow-none btn-ghost">
             Showroom
           </Link> */}
-          <Link to="/aboutUs" className=" border-0 shadow-none btn-ghost">
+          <Link to="/about" className=" border-0 shadow-none btn-ghost">
             About Us
           </Link>
         </div>
