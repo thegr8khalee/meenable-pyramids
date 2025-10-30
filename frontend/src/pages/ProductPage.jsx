@@ -13,7 +13,7 @@ import {
   Trash2,
   Star,
 } from 'lucide-react';
-import whatsapp from '../images/whatsapp.png';
+import whatsapp from '../images/whatsapp.webp';
 import { useProductsStore } from '../store/useProductsStore';
 import { useCartStore } from '../store/UseCartStore';
 import { useAuthStore } from '../store/useAuthStore';

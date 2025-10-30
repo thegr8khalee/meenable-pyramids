@@ -1,12 +1,12 @@
 /* eslint-disable no-unused-vars */
 // src/pages/CartPage.jsx
-import spiceherbs from '../images/spices-herbs.jpg';
+import spiceherbs from '../images/spices-herbs.webp';
 import React, { useEffect, useRef, useState } from 'react';
 import { useCartStore } from '../store/UseCartStore';
 import { Loader2, Trash2, Minus, Plus, ShoppingCart, X } from 'lucide-react';
 import { Link, useNavigate } from 'react-router-dom';
 import { axiosInstance } from '../lib/axios.js';
-import whatsapp from '../images/whatsapp.png';
+import whatsapp from '../images/whatsapp.webp';
 // import Hero1 from '../images/Hero1.png';
 import { useAuthStore } from '../store/useAuthStore.js';
 import { useCheckOutStore } from '../store/useCheckoutStore.js';

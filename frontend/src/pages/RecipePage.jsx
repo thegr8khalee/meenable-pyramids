@@ -17,7 +17,7 @@ import { useAdminStore } from '../store/useAdminStore';
 import { useAuthStore } from '../store/useAuthStore';
 import { useCartStore } from '../store/UseCartStore';
 
-import whatsapp from '../images/whatsapp.png';
+import whatsapp from '../images/whatsapp.webp';
 
 const RecipePage = () => {
   const { recipeId } = useParams();

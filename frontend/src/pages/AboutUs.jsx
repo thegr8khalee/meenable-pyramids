@@ -1,5 +1,5 @@
 import React from 'react';
-import spiceherbs from '../images/spices-herbs.jpg';
+import spiceherbs from '../images/spices-herbs.webp';
 // import Hero1 from '../images/Hero1.png';
 // import ME from '../images/ME.png';
 // import CEO from '../images/CEO.png';

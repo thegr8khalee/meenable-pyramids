@@ -1,13 +1,13 @@
 /* eslint-disable no-unused-vars */
 // src/pages/Shop.jsx
-import spiceherbs from '../images/spices-herbs.jpg';
+import spiceherbs from '../images/spices-herbs.webp';
 import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { useLocation, useNavigate, Link } from 'react-router-dom';
 import { useProductsStore } from '../store/useProductsStore';
 import { useAuthStore } from '../store/useAuthStore';
 import { Loader2, Filter, Search, ShoppingCart, Star } from 'lucide-react';
 import FilterModal from '../components/FilterModal';
-import whatsapp from '../images/whatsapp.png';
+import whatsapp from '../images/whatsapp.webp';
 import { useCartStore } from '../store/UseCartStore';
 const ITEMS_PER_PAGE = 12;
 

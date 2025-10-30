@@ -3,7 +3,7 @@ import React, { useState } from 'react'; // Import useState
 import { Loader2 } from 'lucide-react'; // Import Loader2 for loading state
 import { toast } from 'react-hot-toast'; // Import toast for notifications
 import { axiosInstance } from '../lib/axios.js'; // Your configured Axios instance
-import spiceherbs from '../images/spices-herbs.jpg'
+import spiceherbs from '../images/spices-herbs.webp'
 import { useAuthStore } from '../store/useAuthStore.js';
 
 const Contact = () => {

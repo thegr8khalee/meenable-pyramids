@@ -1,11 +1,11 @@
 import React, { useEffect } from 'react';
-import leaf from '../images/leaf.png';
-import hero from '../images/hero.png';
-import chilli from '../images/chilli.png';
-import seasoning from '../images/seasoning.png';
-import spice from '../images/spice.png';
-import white from '../images/white.png';
-import grey from '../images/grey.png';
+import leaf from '../images/leaf.webp';
+import hero from '../images/hero.webp';
+import chilli from '../images/chilli.webp';
+import seasoning from '../images/seasoning.webp';
+import spice from '../images/spice.webp';
+import white from '../images/white.webp';
+import grey from '../images/grey.webp';
 // import cardamom from '../images/cardamom.jpg';
 // import recipe from '../images/recipe.png';
 // eslint-disable-next-line no-unused-vars
