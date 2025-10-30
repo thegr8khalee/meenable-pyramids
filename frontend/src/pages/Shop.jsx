@@ -1,6 +1,6 @@
 /* eslint-disable no-unused-vars */
 // src/pages/Shop.jsx
-import spiceherbs from '../images/spices-herbs.webp';
+// import spiceherbs from '../images/spices-herbs.webp';
 import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { useLocation, useNavigate, Link } from 'react-router-dom';
 import { useProductsStore } from '../store/useProductsStore';
@@ -186,7 +186,7 @@ const Shop = () => {
     <div className="">
       <div className="relative">
         <img
-          src={spiceherbs}
+          src='https://res.cloudinary.com/dn2tbatgr/image/upload/v1761828422/spices-herbs_a3v9xo.webp'
           alt="Shop Hero"
           className="object-cover h-50 w-full"
         />

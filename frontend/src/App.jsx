@@ -109,7 +109,7 @@ function App() {
 
         <Toaster />
       </main>
-      <Footer />
+      {window.location.pathname !== '/admin/dashboard' && <Footer />}
       <a
         href={whatsappLink}
         target="_blank"

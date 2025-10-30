@@ -1,6 +1,6 @@
 import React, { useEffect } from 'react';
 import leaf from '../images/leaf.webp';
-import hero from '../images/hero.webp';
+// import hero from '../images/hero.webp';
 import chilli from '../images/chilli.webp';
 import seasoning from '../images/seasoning.webp';
 import spice from '../images/spice.webp';
@@ -87,7 +87,7 @@ const LandingPage = () => {
           id="hero-image"
           className="w-full max-h-[60vh] items-center justify-center flex"
         >
-          <img src={hero} alt="" className="max-h-[70vh] object-cover" />
+          <img src='https://res.cloudinary.com/dn2tbatgr/image/upload/v1761828421/hero_usj1cq.webp' alt="" className="max-h-[70vh] object-cover" />
         </div>
         <div id="hero-cta" className="p-4">
           <h1 className="z-100 relative font-extrabold text-3xl font-[inter]">
@@ -196,7 +196,7 @@ const LandingPage = () => {
           id="hero-image"
           className="min-w-[55vw] lg:min-w-[45vw] items-center justify-center lg:justify-end flex"
         >
-          <img src={hero} alt="" className="h-[40vh] md:h-[60vh] lg:h-[70vh]" />
+          <img src='https://res.cloudinary.com/dn2tbatgr/image/upload/v1761828421/hero_usj1cq.webp' alt="" className="h-[40vh] md:h-[60vh] lg:h-[70vh]" />
         </div>
 
         <div className="absolute inset-0 overflow-hidden z-0 pointer-events-none">

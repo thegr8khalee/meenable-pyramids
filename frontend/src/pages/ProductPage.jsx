@@ -108,7 +108,7 @@ const ProductPage = () => {
   };
 
   // WhatsApp sharing
-  const whatsappNumber = '2348066258729';
+  const whatsappNumber = '2348121900185';
   const productLink = (id) => `${window.location.origin}/product/${id}`;
 
   const fullMessage = (product) =>

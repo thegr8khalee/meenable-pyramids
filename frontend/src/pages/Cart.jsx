@@ -1,6 +1,6 @@
 /* eslint-disable no-unused-vars */
 // src/pages/CartPage.jsx
-import spiceherbs from '../images/spices-herbs.webp';
+// import spiceherbs from '../images/spices-herbs.webp';
 import React, { useEffect, useRef, useState } from 'react';
 import { useCartStore } from '../store/UseCartStore';
 import { Loader2, Trash2, Minus, Plus, ShoppingCart, X } from 'lucide-react';
@@ -291,7 +291,7 @@ const CartPage = () => {
     <div className="overflow-x-hidden font-[inter]">
       <div className="relative">
         <img
-          src={spiceherbs}
+          src='https://res.cloudinary.com/dn2tbatgr/image/upload/v1761828422/spices-herbs_a3v9xo.webp'
           alt=""
           className="object-cover h-20 sm:h-40 w-full"
         />

@@ -88,7 +88,7 @@ const RecipePage = () => {
   };
 
   // WhatsApp link generator
-  const whatsappNumber = '2348066258729'; // Your actual WhatsApp number
+  const whatsappNumber = '2348121900185'; // Your actual WhatsApp number
   const productLink = (id) => `${window.location.origin}/recipes/${id}`;
   const fullMessage = (recipeData) =>
     encodeURIComponent(

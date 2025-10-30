@@ -1,5 +1,5 @@
 import React from 'react';
-import spiceherbs from '../images/spices-herbs.webp';
+// import spiceherbs from '../images/spices-herbs.webp';
 // import Hero1 from '../images/Hero1.png';
 // import ME from '../images/ME.png';
 // import CEO from '../images/CEO.png';
@@ -9,9 +9,7 @@ const AboutUs = () => {
     <div className="">
       <div className="relative">
         <img
-          src={
-            spiceherbs
-          }
+          src='https://res.cloudinary.com/dn2tbatgr/image/upload/v1761828422/spices-herbs_a3v9xo.webp'
           alt=""
           className="object-cover h-40 w-full"
         />

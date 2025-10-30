@@ -3,7 +3,7 @@ import React, { useState } from 'react'; // Import useState
 import { Loader2 } from 'lucide-react'; // Import Loader2 for loading state
 import { toast } from 'react-hot-toast'; // Import toast for notifications
 import { axiosInstance } from '../lib/axios.js'; // Your configured Axios instance
-import spiceherbs from '../images/spices-herbs.webp'
+// import spiceherbs from '../images/spices-herbs.webp'
 import { useAuthStore } from '../store/useAuthStore.js';
 
 const Contact = () => {
@@ -45,9 +45,7 @@ const Contact = () => {
     <div className="">
       <div className="relative">
         <img
-          src={
-            spiceherbs
-          }
+          src='https://res.cloudinary.com/dn2tbatgr/image/upload/v1761828422/spices-herbs_a3v9xo.webp'
           alt="Contact Hero"
           className="object-cover h-40 w-full"
         />
