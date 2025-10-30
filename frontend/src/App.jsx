@@ -41,7 +41,7 @@ function App() {
     checkAuth();
   }, [checkAuth]);
 
-  const whatsappPhoneNumber = '2348066258729'; // REPLACE WITH YOUR ACTUAL PHONE NUMBER
+  const whatsappPhoneNumber = '2348121900185'; // REPLACE WITH YOUR ACTUAL PHONE NUMBER
   // Your preset message (URL-encoded)
   const presetMessage = encodeURIComponent(
     "Hello, I'm interested in your products. I saw your website and would like to inquire more."

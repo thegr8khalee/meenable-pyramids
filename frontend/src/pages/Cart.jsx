@@ -183,7 +183,7 @@ const CartPage = () => {
     }, 10);
   };
 
-  const whatsappNumber = '2348066258729'; // REPLACE WITH YOUR ACTUAL PHONE NUMBER
+  const whatsappNumber = '2348121900185'; // REPLACE WITH YOUR ACTUAL PHONE NUMBER
 
   // Helper function to get the link for a product item
   const getItemLink = (item) => {

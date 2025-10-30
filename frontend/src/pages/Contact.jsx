@@ -178,7 +178,7 @@ const Contact = () => {
                     href="mailto:pheezyhomesinteriors@gmial.com"
                     className=" hover:underline"
                   >
-                    pheezyhomesinteriors@gmial.com
+                    
                   </a>
                 </p>
               </div>
@@ -191,7 +191,7 @@ const Contact = () => {
                     rel="noopener noreferrer"
                     className="hover:underline"
                   >
-                    +2348066258729
+                    
                   </a>
                 </p>
               </div>
@@ -207,7 +207,7 @@ const Contact = () => {
                 <h3 className="font-bold text-lg">Follow Us:</h3>
                 <div className="flex space-x-4 mt-2">
                   <a
-                    href="https://wa.me/2348066258729"
+                    // href="https://wa.me/2348066258729"
                     target="_blank"
                     rel="noopener noreferrer"
                     aria-label="WhatsApp"
@@ -221,7 +221,7 @@ const Contact = () => {
                     />
                   </a>
                   <a
-                    href="https://www.instagram.com/pheezyhomes_interiors?utm_source=ig_web_button_share_sheet&igsh=ZDNlZDc0MzIxNw=="
+                    // href="https://www.instagram.com/pheezyhomes_interiors?utm_source=ig_web_button_share_sheet&igsh=ZDNlZDc0MzIxNw=="
                     target="_blank"
                     rel="noopener noreferrer"
                     aria-label="Instagram"
